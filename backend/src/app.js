@@ -6,7 +6,12 @@ const cors = require('cors');
 const app = express();
 
 app.get("/", (req, res) => {
-    res.send("Api Gallery");
+  res.send("Api Gallery");
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
 });
 
 app.use(cors({
