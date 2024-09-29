@@ -25,13 +25,13 @@ app.use('/users', userRoutes);
 app.use('/photos', photoRoutes);
 app.use('/album', albumRoutes);
 
-const server = app.listen(PORT, () => {
-  console.log(`Server running on port http://localhost:${PORT}`);
-});
+// const server = app.listen(PORT, () => {
+//   console.log(`Server running on port http://localhost:${PORT}`);
+// });
 
-process.on("SIGINT", () => {
-  server.close(() => {
-    console.log("Server Disconnected");
-    process.exit(0);
-  });
-});
+// process.on("SIGINT", () => {
+//   server.close(() => {
+//     console.log("Server Disconnected");
+//     process.exit(0);
+//   });
+// });
