@@ -6,6 +6,12 @@ const cors = require('cors');
 const app = express();
 
 app.get("/", (req, res) => {
+  const token = req.headers['authorization'];
+
+  if(!token) {
+    return res.status(401).send('Unauthorized');
+  }
+
   res.send("Api Gallery");
 });
 
