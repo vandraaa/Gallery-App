@@ -6,12 +6,6 @@ const cors = require('cors');
 const app = express();
 
 app.get("/", (req, res) => {
-  const token = req.headers['authorization'];
-
-  if(!token) {
-    return res.status(401).send('Unauthorized');
-  }
-
   res.send("Api Gallery");
 });
 
@@ -21,7 +15,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use(cors({
-  origin: 'http://localhost:3000'
+  origin: '*',
 }));
 
 // parse application/json
@@ -46,3 +40,5 @@ app.use('/album', albumRoutes);
 //     process.exit(0);
 //   });
 // });
+
+module.exports = app
