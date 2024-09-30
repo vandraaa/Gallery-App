@@ -108,16 +108,28 @@ const createUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const userId = req.params.id;
     const updateData = req.body;
+
+    const emailExist = await prisma.user.findUnique({
+      where: {
+        email: updateData.email,
+      },
+    });
+
+    if(!emailExist) {
+      return res.status(400).send({ message: "Email already exist" });
+    }
+
+    const hashedPassword = await hashPassword(updateData.password);
 
     const user = await prisma.user.update({
       where: {
-        userId: parseInt(userId),
+        email: updateData.email,
       },
       data: {
         name: updateData.name,
         email: updateData.email,
+        password: hashedPassword,
       },
     });
 
