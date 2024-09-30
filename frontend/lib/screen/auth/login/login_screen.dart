@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gallery_app/screen/home/home_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:gallery_app/constant/constant.dart';
@@ -46,6 +47,11 @@ class _SignInFormState extends State<SignInForm> {
           content: Text(
               'Login berhasil, selamat datang ${responseData['data']['name']}!'),
         ));
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
 
         setState(() {
           _emailController.clear();
