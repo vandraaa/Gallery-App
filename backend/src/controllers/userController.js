@@ -132,10 +132,6 @@ const updateUser = async (req, res) => {
         name: updateData.name,
         email: updateData.email,
         password: hashedPassword,
-        updatedAt: new Date(),
-      },
-      include: {
-        user: true,
       },
     });
 
