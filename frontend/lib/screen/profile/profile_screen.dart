@@ -1,4 +1,7 @@
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:gallery_app/constant/constant.dart';
 import 'package:gallery_app/screen/auth/service/auth_service.dart';
 import 'package:gallery_app/screen/home/home_screen.dart';
 
@@ -14,8 +17,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String userEmail = '';
   String userPassword = '';
   bool isLoading = true;
+  bool isLoadingSubmit = false;
   final Color blueAccentShade700 = Colors.blueAccent.withOpacity(0.8);
   final _formKey = GlobalKey<FormState>();
+
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
 
   @override
   void initState() {
@@ -31,6 +39,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       userEmail = userData['email'] ?? 'Loading...';
       isLoading = false;
     });
+
+    _nameController.text = userName;
+    _emailController.text = userEmail;
   }
 
   String getInitials(String name) {
@@ -43,11 +54,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return nameParts.map((e) => e[0]).join().toUpperCase();
   }
 
+  Future<void> updateUser(
+      BuildContext context, String name, String email, String password) async {
+    setState(() {
+      isLoadingSubmit = true;
+    });
+
+    final url = Uri.parse(baseUrl + '/users');
+    final headers = {
+      "Access-Control-Allow-Origin": "*",
+      'Content-Type': 'application/json',
+      'Accept': '*/*',
+    };
+
+    final body = json.encode(
+      {
+        "name": name,
+        "email": email,
+        "password": password,
+      }
+    );
+
+    try {
+      final response = await http.patch(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(responseData['message']),
+          ),
+        );
+        setState(() {
+          isLoadingSubmit = false;
+        });
+      } else {
+        final responseData = json.decode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(responseData['message']),
+          ),
+        );
+        setState(() {
+          isLoadingSubmit = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoadingSubmit = false;
+      });
+      print(e);
+    }
+  }
+
   void _updateProfile() {
     if (_formKey.currentState!.validate()) {
-      // Add logic to update user profile with the values from the text fields
-      print("Updating profile with Name: $userName, Email: $userEmail, Password: $userPassword");
-      // You can call your AuthService to update the user data here
+      final name = _nameController.text;
+      final password = _passwordController.text;
+
+      updateUser(context, name, userEmail, password);
+      print(
+          "Updating profile with Name: $userName, Email: $userEmail, Password: $userPassword");
     }
   }
 
@@ -130,13 +197,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 children: [
                   TextFormField(
-                    controller: TextEditingController(text: userName),
+                    controller: _nameController,
                     decoration: const InputDecoration(
                       hintText: 'Masukkan Nama Lengkap',
                       filled: true,
-                      fillColor: Color(0xFFF5FCF9),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
+                      fillColor: Color.fromARGB(255, 225, 228, 235),
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 24.0, vertical: 10.0),
                       border: OutlineInputBorder(
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.all(Radius.circular(50)),
@@ -154,7 +221,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     },
                     keyboardType: TextInputType.name,
                     onChanged: (value) {
-                      userName = value; 
+                      userName = value;
                     },
                   ),
                   const SizedBox(height: 16.0),
@@ -175,13 +242,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 6.0),
                   TextFormField(
-                    controller: TextEditingController(text: userEmail),
+                    controller: _emailController,
                     decoration: const InputDecoration(
                       hintText: 'Masukkan Email',
                       filled: true,
-                      fillColor: Color(0xFFF5FCF9),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
+                      fillColor: Color.fromARGB(255, 225, 228, 235),
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 24.0, vertical: 10.0),
                       border: OutlineInputBorder(
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.all(Radius.circular(50)),
@@ -191,19 +258,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           fontWeight: FontWeight.w400,
                           fontFamily: 'Poppins'),
                     ),
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Email harus diisi';
-                      }
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                        return 'Email tidak valid';
-                      }
-                      return null;
-                    },
-                    keyboardType: TextInputType.emailAddress,
-                    onChanged: (value) {
-                      userEmail = value; 
-                    },
+                    enabled: false,
+                  ),
+                  SizedBox(height: 3.0),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: const Text(
+                        "Email tidak dapat di ganti!",
+                        style: TextStyle(
+                          color: Colors.redAccent,
+                          fontSize: 12.0,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16.0),
                   const Padding(
@@ -224,12 +294,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 6.0),
                   TextFormField(
                     obscureText: true,
+                    controller: _passwordController,
                     decoration: const InputDecoration(
                       hintText: 'Masukkan Password',
                       filled: true,
-                      fillColor: Color(0xFFF5FCF9),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
+                      fillColor: Color.fromARGB(255, 225, 228, 235),
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 24.0, vertical: 10.0),
                       border: OutlineInputBorder(
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.all(Radius.circular(50)),
@@ -249,13 +320,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     },
                     keyboardType: TextInputType.visiblePassword,
                     onChanged: (value) {
-                      userPassword = value; 
+                      userPassword = value;
                     },
                   ),
                   const SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
                         _updateProfile();
                       }
                     },
@@ -295,13 +367,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Route _createRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => const HomeScreen(),
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          const HomeScreen(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 0.0);
         const end = Offset.zero;
         const curve = Curves.ease;
 
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
         var offsetAnimation = animation.drive(tween);
         return SlideTransition(
           position: offsetAnimation,
