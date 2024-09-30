@@ -122,6 +122,8 @@ const updateUser = async (req, res) => {
 
     const hashedPassword = await hashPassword(updateData.password);
 
+    const jwtSecretKey = process.env.JWT_SECRET;
+
     const user = await prisma.user.update({
       where: {
         email: updateData.email,
@@ -130,10 +132,24 @@ const updateUser = async (req, res) => {
         name: updateData.name,
         email: updateData.email,
         password: hashedPassword,
+        updatedAt: new Date(),
+      },
+      include: {
+        user: true,
       },
     });
 
-    res.status(200).send({ message: "Update User Successfully", data: user });
+    const token = jwt.sign(
+      {
+        userId: user.userId,
+        name: user.name,
+        email: user.email,
+      },
+      jwtSecretKey,
+      { expiresIn: "7d" }
+    );
+
+    res.status(200).send({ message: "Update User Successfully", data: user, token });
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Failed to update user" });
