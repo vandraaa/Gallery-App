@@ -85,6 +85,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             content: Text(responseData['message']),
           ),
         );
+
+        String? newToken = responseData['token'];
+
+        if (newToken != null) {
+          final service = AuthService();
+          await service.saveToken(newToken);
+        }
+
         setState(() {
           isLoadingSubmit = false;
         });
@@ -338,7 +346,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       minimumSize: const Size(double.infinity, 48),
                       shape: const StadiumBorder(),
                     ),
-                    child: isLoading
+                    child: isLoadingSubmit
                         ? const SizedBox(
                             width: 20,
                             height: 20,
