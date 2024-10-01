@@ -29,7 +29,7 @@ model Photo {
   url         String
   description String?
   createdAt   DateTime @default(now())
-  // albumId     Int?
+  albumId     Int?
   isDelete    Boolean  @default(false)
   isFavorite  Boolean  @default(false)
   user        User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
