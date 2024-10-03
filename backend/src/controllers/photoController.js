@@ -63,6 +63,9 @@ const getPhotosByUserId = async (req, res) => {
             where: {
                 userId: parseInt(userId),
                 isDelete: false
+            },
+            orderBy: {
+                createdAt: 'desc'
             }
         });
 
