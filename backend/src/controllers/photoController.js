@@ -206,7 +206,7 @@ const favoritePhoto = async (req, res) => {
         })
 
         if(photo.isFavorite === true) {
-            return res.status(400).send({ message: "Successfully unfavorited photo", data });
+            return res.status(200).send({ message: "Successfully unfavorited photo", data });
         } else {
             return res.status(200).send({ message: "Successfully added to favorites", data });
         }
