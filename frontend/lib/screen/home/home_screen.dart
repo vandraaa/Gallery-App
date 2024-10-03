@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:gallery_app/alert/alert.dart';
 import 'package:gallery_app/screen/auth/auth_screen.dart';
 import 'package:gallery_app/screen/auth/service/auth_service.dart';
+import 'package:gallery_app/screen/home/content/album_content.dart';
+import 'package:gallery_app/screen/home/content/home_content.dart';
 import 'package:gallery_app/screen/profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -11,15 +14,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int userId = 0;
   String userName = '';
   bool isLoading = true;
+  int _selectedIndex = 0;
 
-  // Fungsi untuk memuat data pengguna dari AuthService
   Future<void> _loadUserData() async {
     final authService = AuthService();
     final userData = await authService.getUserData();
     setState(() {
       userName = userData['name'] ?? 'Loading...';
+      userId = userData['userId'] ?? 'Loading...';
       isLoading = false;
     });
   }
@@ -42,10 +47,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _handleLogout() async {
     final authService = AuthService();
-    await authService.removeToken();
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => AuthScreen()),
-    );
+    try {
+      await authService.removeToken();
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => AuthScreen()),
+      );
+      showAlert(context, 'Logout Success', true);
+    } catch (e) {
+      showAlert(context, 'Logout Failed', false);
+    }
+  }
+
+  Widget _getSelectedWidget() {
+    switch (_selectedIndex) {
+      case 0:
+        return HomeContent(userId: userId);
+      case 1:
+        return const AlbumContent();
+      case 2:
+        return const Center(child: Text('Favorite Content'));
+      case 3:
+        return const Center(child: Text('Trash Content'));
+      default:
+        return HomeContent(userId: userId);
+    }
   }
 
   @override
@@ -90,7 +115,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (value == 'profile') {
                   Navigator.of(context).pushReplacement(
                     PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) => const ProfileScreen(),
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          const ProfileScreen(),
                       transitionDuration: Duration.zero,
                       reverseTransitionDuration: Duration.zero,
                     ),
@@ -151,8 +177,44 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         backgroundColor: Colors.blueAccent,
       ),
-      body: Center(
-        child: Text('Selamat datang, $userName!'),
+      body: _getSelectedWidget(),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'All',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.photo_album),
+            label: 'Album',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Favorite',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.delete),
+            label: 'Trash',
+          ),
+        ],
+        selectedItemColor: Colors.blueAccent,
+        unselectedItemColor: const Color.fromRGBO(158, 158, 158, 1),
+        showUnselectedLabels: true,
+        selectedLabelStyle: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Poppins',
+        ),
+        unselectedLabelStyle: TextStyle(
+          fontSize: 10,
+          fontFamily: 'Poppins',
+        ),
       ),
     );
   }

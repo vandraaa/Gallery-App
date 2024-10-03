@@ -66,18 +66,36 @@ class _SplashScreenState extends State<SplashScreen> {
       body: AnimatedOpacity(
         opacity: _opacity,
         duration: const Duration(milliseconds: 500),
-        child: Center(
-          child: LottieBuilder.asset(
-            "assets/splash_screen/splash.json",
-            animate: true,
-            repeat: false,
-            onLoaded: (composition) {
-              Future.delayed(composition.duration, () {
-                _isAnimationCompleted = true;
-                startFadeOut();
-              });
-            },
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Center(
+                child: LottieBuilder.asset(
+                  "assets/splash_screen/splash.json",
+                  animate: true,
+                  repeat: false,
+                  onLoaded: (composition) {
+                    Future.delayed(composition.duration, () {
+                      _isAnimationCompleted = true;
+                      startFadeOut();
+                    });
+                  },
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: Text(
+                'Created by Kevin Andra',
+                style: TextStyle(
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
