@@ -275,5 +275,7 @@ module.exports = {
     getDetailPhoto, 
     deletePhoto, 
     trash, 
-    favoritePhoto
+    favoritePhoto,
+    getFavoritePhoto,
+    getTrashPhoto
 }
