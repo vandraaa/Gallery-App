@@ -81,6 +81,59 @@ const getPhotosByUserId = async (req, res) => {
     }
 }
 
+const getFavoritePhoto = async (req, res) => {
+    try {
+        const userId = req.query.id;
+
+        const photos = await prisma.photo.findMany({
+            where: {
+                userId: parseInt(userId),
+                isFavorite: true,
+                isDelete: false
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        const photosExist = photos.length > 0;
+        if (!photosExist) {
+            return res.status(400).send({ message: "Favorites photos not found" });
+        }
+
+        res.status(200).send({ message: "Get Photos Successfully", data: photos });
+    } catch (e) {
+        console.log(error);
+        res.status(500).send({ message: "Failed to get photos" });
+    }
+}
+
+const getTrashPhoto = async (req, res) => {
+    try {
+        const userId = req.query.id;
+
+        const photo = await prisma.photo.findMany({
+            where: {
+                userId: parseInt(userId),
+                isDelete: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        const photosExist = photo.length > 0;
+        if (!photosExist) {
+            return res.status(400).send({ message: "Trash photos not found" });
+        }
+
+        res.status(200).send({ message: "Get Photos Successfully", data: photo });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: "Failed to get photos" });
+    }
+}
+
 const getDetailPhoto = async (req, res) => {
     try {
         const photoId = req.query.id;
@@ -168,7 +221,7 @@ const trash = async (req, res) => {
         })
 
         if (photo.isDelete === true) {
-            return res.status(400).send({ message: "Successfully restored", data });
+            return res.status(200).send({ message: "Successfully restored", data });
         } else {
             return res.status(200).send({ message: "Successfully deleted", data });
         }
