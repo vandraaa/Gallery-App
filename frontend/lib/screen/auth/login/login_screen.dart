@@ -24,12 +24,12 @@ class _SignInFormState extends State<SignInForm> {
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
 
-  bool isLoading = false;
+  bool _isLoading = false;
 
   Future<void> loginUser(
       BuildContext context, String email, String password) async {
     setState(() {
-      isLoading = true;
+      _isLoading = true;
     });
     final url = Uri.parse(baseUrl + '/users/login');
     final headers = {
@@ -67,7 +67,7 @@ class _SignInFormState extends State<SignInForm> {
       showAlert(context, e.toString(), false);
     } finally {
       setState(() {
-        isLoading = false;
+        _isLoading = false;
       });
     }
   }
@@ -189,7 +189,7 @@ class _SignInFormState extends State<SignInForm> {
                     minimumSize: const Size(double.infinity, 48),
                     shape: const StadiumBorder(),
                   ),
-                  child: isLoading
+                  child: _isLoading
                       ? const SizedBox(
                           width: 20,
                           height: 20,

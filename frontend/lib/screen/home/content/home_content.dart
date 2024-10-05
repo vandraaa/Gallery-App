@@ -166,7 +166,6 @@ class _HomeContentState extends State<HomeContent> {
         ),
       );
 
-      // For each date, add the photos
       var photos = _groupedPhotos[date]!;
       photoWidgets.add(
         GridView.builder(
@@ -183,16 +182,22 @@ class _HomeContentState extends State<HomeContent> {
             var photo = photos[index];
             return GestureDetector(
                 onTap: () {
-                  // Navigate to the detail page when the photo is tapped
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => PhotoDetailPage(
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          PhotoDetailScreen(
                         photoUrl: photo['url'],
-                        description:
-                            photo['description'] ?? 'No description available',
+                        description: photo['description'],
                         createdAt: photo['createdAt'],
+                        userId: photo['userId'],
+                        id: photo['photoId'],
+                        isFavorite: photo['isFavorite'],
                       ),
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        return child;
+                      },
                     ),
                   );
                 },
