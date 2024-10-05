@@ -38,11 +38,24 @@ const createPhoto = async (req, res) => {
             return res.status(400).send({ message: "File is required" });
         }
 
+        const filename = file.originalname;
+        const sizeInBytes = file.size;
+
+        const formatSizeFile = (bytes) => {
+            if (bytes >= 1024 * 1024) {
+                return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+            } else {
+                return `${(bytes / 1024).toFixed(2)} KB`;
+            }
+        }
+
         const imageUrl = await uploadImageToFirebase(file);
 
         const photo = await prisma.photo.create({
             data: {
                 userId: parseInt(userId),
+                filename,
+                size: formatSizeFile(sizeInBytes),
                 url: imageUrl,
                 description: description ? description : null,
                 albumId: albumId ? parseInt(albumId) : null

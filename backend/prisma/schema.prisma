@@ -26,6 +26,8 @@ model User {
 model Photo {
   photoId     Int      @id @default(autoincrement())
   userId      Int
+  filename    String
+  size        String
   url         String
   description String?
   createdAt   DateTime @default(now())
