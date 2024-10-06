@@ -27,7 +27,7 @@ class _SignUpFormState extends State<SignUpForm> {
 
   bool _isLoading = false;
 
-  Future<void> signUpUser(
+  Future<void> _signUpUser(
       BuildContext context, String name, String email, String password) async {
     setState(() {
       _isLoading = true;
@@ -226,7 +226,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
-                    signUpUser(context, _nameController.text,
+                    _signUpUser(context, _nameController.text,
                         _emailController.text, _passwordController.text);
                     FocusScope.of(context).unfocus();
                   }

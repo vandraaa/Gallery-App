@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:gallery_app/screen/home/content/add_photo/new_photo.dart';
 import 'package:gallery_app/screen/home/content/detail_photo/detail_photo.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -133,8 +134,27 @@ class _HomeContentState extends State<HomeContent> {
       floatingActionButton: _isFabVisible
           ? FloatingActionButton(
               backgroundColor: Colors.blue,
-              onPressed: () {
-                // Action when button is pressed
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        AddPhotoScreen(
+                      userId: widget.userId,
+                    ),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      return child;
+                    },
+                  ),
+                );
+
+                if (result == true) {
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  await _fetchPhotos(); 
+                }
               },
               shape: const CircleBorder(),
               child: const Icon(
@@ -169,67 +189,67 @@ class _HomeContentState extends State<HomeContent> {
       );
 
       var photos = _groupedPhotos[date]!;
-        photoWidgets.add(
-      GridView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            childAspectRatio: 1,
-            crossAxisSpacing: 8.0,
-            mainAxisSpacing: 8.0,
-          ),
-          itemCount: photos.length,
-          itemBuilder: (context, index) {
-            var photo = photos[index];
-            return GestureDetector(
-              onTap: () async {
-                await Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        PhotoDetailScreen(
-                      photoUrl: photo['url'],
-                      description: photo['description'],
-                      createdAt: photo['createdAt'],
-                      userId: photo['userId'],
-                      id: photo['photoId'],
-                      isFavorite: photo['isFavorite'],
-                      filename: photo['filename'],
-                      size: photo['size'],
+      photoWidgets.add(
+        GridView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              childAspectRatio: 1,
+              crossAxisSpacing: 8.0,
+              mainAxisSpacing: 8.0,
+            ),
+            itemCount: photos.length,
+            itemBuilder: (context, index) {
+              var photo = photos[index];
+              return GestureDetector(
+                onTap: () async {
+                  await Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          PhotoDetailScreen(
+                        photoUrl: photo['url'],
+                        description: photo['description'],
+                        createdAt: photo['createdAt'],
+                        userId: photo['userId'],
+                        id: photo['photoId'],
+                        isFavorite: photo['isFavorite'],
+                        filename: photo['filename'],
+                        size: photo['size'],
+                      ),
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        return child;
+                      },
                     ),
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
-                      return child;
-                    },
-                  ),
-                );
+                  );
 
-                setState(() {
-                  _isLoading = true;
-                });
-                await _fetchPhotos();
-              },
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      image: DecorationImage(
-                        image: NetworkImage(photo['url']),
-                        fit: BoxFit.cover,
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  await _fetchPhotos();
+                },
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        image: DecorationImage(
+                          image: NetworkImage(photo['url']),
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            );
-          }),
+              );
+            }),
       );
     }
     return photoWidgets;

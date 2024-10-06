@@ -1,3 +1,4 @@
+import 'package:gallery_app/alert/confirmPopupCenter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -189,7 +190,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Nama Lengkap',
+                  'Name',
                   style: TextStyle(
                     color: Colors.black87,
                     fontSize: 14.5,
@@ -207,7 +208,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   TextFormField(
                     controller: _nameController,
                     decoration: const InputDecoration(
-                      hintText: 'Masukkan Nama Lengkap',
+                      hintText: 'Enter your name',
                       filled: true,
                       fillColor: Color.fromARGB(255, 225, 228, 235),
                       contentPadding: EdgeInsets.symmetric(
@@ -223,7 +224,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     validator: (value) {
                       if (value!.isEmpty) {
-                        return 'Nama Lengkap harus diisi';
+                        return 'Name cannot be empty';
                       }
                       return null;
                     },
@@ -252,7 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(
-                      hintText: 'Masukkan Email',
+                      // hintText: 'Masukkan Email',
                       filled: true,
                       fillColor: Color.fromARGB(255, 225, 228, 235),
                       contentPadding: EdgeInsets.symmetric(
@@ -304,7 +305,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     obscureText: true,
                     controller: _passwordController,
                     decoration: const InputDecoration(
-                      hintText: 'Masukkan Password',
+                      hintText: 'Enter your password',
                       filled: true,
                       fillColor: Color.fromARGB(255, 225, 228, 235),
                       contentPadding: EdgeInsets.symmetric(
@@ -320,9 +321,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     validator: (value) {
                       if (value!.isEmpty) {
-                        return 'Password harus diisi';
+                        return 'Password cannot be empty';
                       } else if (value.length < 6) {
-                        return 'Password minimal 6 karakter';
+                        return 'Password must be at least 6 characters';
                       }
                       return null;
                     },
@@ -336,7 +337,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _formKey.currentState!.save();
-                        _updateProfile();
+                        // _updateProfile();
+                        confirmPopupCenter(
+                          context, 
+                          'Update Profile', 
+                          'Are you sure you want to update your profile?', 
+                          'Save', 
+                          _updateProfile
+                        );
                       }
                     },
                     style: ElevatedButton.styleFrom(

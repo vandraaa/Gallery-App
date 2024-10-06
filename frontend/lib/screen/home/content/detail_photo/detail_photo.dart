@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_app/alert/alert.dart';
-import 'package:gallery_app/alert/confirmPopup.dart';
+import 'package:gallery_app/alert/confirmPopupCenter.dart';
 import 'package:gallery_app/constant/constant.dart';
 import 'package:gallery_app/screen/home/home_screen.dart';
 import 'package:intl/intl.dart';
@@ -105,7 +105,12 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
 
   String _formatDate(String createdAt) {
     DateTime parsedDate = DateTime.parse(createdAt);
-    return DateFormat('dd MMMM yyyy').format(parsedDate);
+    return DateFormat('EEEE, dd MMMM yyyy').format(parsedDate);
+  }
+
+  String _formatTime(String createdAt) {
+    DateTime parsedDate = DateTime.parse(createdAt);
+    return DateFormat('HH:mm:ss').format(parsedDate);
   }
 
   @override
@@ -134,7 +139,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
             icon: Icon(Icons.delete_outline),
             color: Colors.white,
             onPressed: () {
-              confirmPopup(
+              confirmPopupCenter(
                   context,
                   'Want to delete this photo?',
                   'Photos will be moved to the trash and will be deleted within 30 days.',
@@ -144,7 +149,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
           ),
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -181,20 +186,30 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
               ),
             ),
             SizedBox(height: 16),
+            if (widget.description.isNotEmpty)
+              Text(
+                "Photo Description: ${widget.description}",
+                style: const TextStyle(
+                  fontSize: 15.5,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             Text(
-              "Photo Description: ${widget.description}",
+              _formatDate(widget.createdAt),
               style: const TextStyle(
-                fontSize: 15.5,
+                fontSize: 14.5,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w600,
+                color: Color.fromARGB(255, 86, 85, 85),
               ),
             ),
             Text(
-              "Uploaded on: ${_formatDate(widget.createdAt)}",
+              _formatTime(widget.createdAt),
               style: const TextStyle(
                 fontSize: 14,
                 fontFamily: 'Poppins',
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 color: Colors.grey,
               ),
             ),

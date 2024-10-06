@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_app/alert/alert.dart';
+import 'package:gallery_app/alert/confirmPopupCenter.dart';
 import 'package:gallery_app/screen/auth/auth_screen.dart';
 import 'package:gallery_app/screen/auth/service/auth_service.dart';
 import 'package:gallery_app/screen/home/content/album_content.dart';
@@ -123,7 +124,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
                 } else if (value == 'logout') {
-                  _handleLogout();
+                  confirmPopupCenter(
+                    context, 
+                    'Are you sure?', 
+                    'Are you sure you want to log out?', 
+                    'Yes, Log out', 
+                    _handleLogout
+                  );
                 }
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
