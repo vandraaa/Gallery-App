@@ -225,11 +225,12 @@ const trash = async (req, res) => {
         const data = await prisma.photo.update({
             where: {
                 userId: parseInt(userId),
-                photoId: parseInt(photoId)
+                photoId: parseInt(photoId),
             },
             data: {
                 isDelete: !photo.isDelete,
-                isFavorite: false
+                isFavorite: false,
+                albumId: null
             }
         })
 
