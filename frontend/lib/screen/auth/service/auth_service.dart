@@ -2,7 +2,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 
 class AuthService {
-
   // save token jwt (login)
   Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
@@ -21,6 +20,24 @@ class AuthService {
     await prefs.remove('token');
   }
 
+  // is expired
+  Future<bool> isExpired(String token) async {
+    if (token.isEmpty) {
+      return true;
+    }
+
+    try {
+      final expiryDate = Jwt.getExpiryDate(token);
+      if (expiryDate != null) {
+        return expiryDate.isBefore(DateTime.now());
+      }
+      return true;
+    } catch (e) {
+      print("Error decoding token: $e");
+      return true;
+    }
+  }
+
   // data user
   Future<Map<String, dynamic>> getUserData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -29,5 +46,4 @@ class AuthService {
     print(decodedToken);
     return decodedToken;
   }
-
 }

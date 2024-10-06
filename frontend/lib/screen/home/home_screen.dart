@@ -3,6 +3,7 @@ import 'package:gallery_app/alert/alert.dart';
 import 'package:gallery_app/screen/auth/auth_screen.dart';
 import 'package:gallery_app/screen/auth/service/auth_service.dart';
 import 'package:gallery_app/screen/home/content/album_content.dart';
+import 'package:gallery_app/screen/home/content/favorite_content.dart';
 import 'package:gallery_app/screen/home/content/home_content.dart';
 import 'package:gallery_app/screen/profile/profile_screen.dart';
 
@@ -65,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return const AlbumContent();
       case 2:
-        return const Center(child: Text('Favorite Content'));
+        return FavoriteContent(userId: userId);
       case 3:
         return const Center(child: Text('Trash Content'));
       default:

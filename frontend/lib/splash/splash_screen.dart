@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gallery_app/screen/auth/auth_screen.dart';
 import 'package:gallery_app/screen/home/home_screen.dart';
 import 'package:lottie/lottie.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:gallery_app/screen/auth/service/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -35,23 +35,35 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> navigateToNextScreen() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('token');
+    final AuthService authService = AuthService();
+    final String? token = await authService.getToken();
 
-    if (token != null) {
-      Navigator.of(context).pushReplacement(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              const HomeScreen(),
-          transitionDuration: Duration.zero,
-          reverseTransitionDuration: Duration.zero,
-        ),
-      );
+    if (token != null && token.isNotEmpty) {
+      final bool isExpired = await authService.isExpired(token);
+
+      if (isExpired) {
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                AuthScreen(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const HomeScreen(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
+        );
+      }
     } else {
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) =>
-              AuthScreen(),
+          pageBuilder: (context, animation, secondaryAnimation) => AuthScreen(),
           transitionDuration: Duration.zero,
           reverseTransitionDuration: Duration.zero,
         ),

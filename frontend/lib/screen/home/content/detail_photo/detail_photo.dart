@@ -15,6 +15,8 @@ class PhotoDetailScreen extends StatefulWidget {
   final int userId;
   final int id;
   final bool isFavorite;
+  final String filename;
+  final String size;
 
   const PhotoDetailScreen({
     Key? key,
@@ -24,6 +26,8 @@ class PhotoDetailScreen extends StatefulWidget {
     required this.userId,
     required this.id,
     required this.isFavorite,
+    required this.filename,
+    required this.size,
   }) : super(key: key);
 
   @override
@@ -178,9 +182,9 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
             ),
             SizedBox(height: 16),
             Text(
-              widget.description,
+              "Photo Description: ${widget.description}",
               style: const TextStyle(
-                fontSize: 18,
+                fontSize: 15.5,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w600,
               ),
@@ -190,7 +194,26 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
               style: const TextStyle(
                 fontSize: 14,
                 fontFamily: 'Poppins',
-                fontWeight: FontWeight.w400,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              "Filename: ${widget.filename}",
+              style: const TextStyle(
+                fontSize: 14,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
+            ),
+            Text(
+              "Size: ${widget.size}",
+              style: const TextStyle(
+                fontSize: 14,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w500,
                 color: Colors.grey,
               ),
             ),
