@@ -73,11 +73,11 @@ class _AlbumContentState extends State<AlbumContent> {
                       color: Colors.black.withOpacity(0.25),
                     ),
                   ),
-                  Align(
+                  const Align(
                     alignment: Alignment.bottomLeft,
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: const Text(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
                         'Album Name',
                         style: TextStyle(
                           color: Colors.white,

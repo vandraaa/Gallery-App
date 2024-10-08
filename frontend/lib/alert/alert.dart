@@ -17,7 +17,7 @@ void showAlert(BuildContext context, String message, bool isSuccess) {
         const SizedBox(width: 10), 
         Text(
           message,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 13,
             fontWeight: FontWeight.w500,

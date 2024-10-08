@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_app/alert/alert.dart';
-import 'package:gallery_app/alert/confirmPopupCenter.dart';
 import 'package:gallery_app/constant/constant.dart';
 import 'package:gallery_app/screen/home/home_screen.dart';
 import 'package:intl/intl.dart';
@@ -8,9 +7,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
 
-class PhotoDetailScreen extends StatefulWidget {
+class TrashDetailScreen extends StatefulWidget {
   final String photoUrl;
-  final String? description;
+  final String description;
   final String createdAt;
   final int userId;
   final int id;
@@ -18,7 +17,7 @@ class PhotoDetailScreen extends StatefulWidget {
   final String filename;
   final String size;
 
-  const PhotoDetailScreen({
+  const TrashDetailScreen({
     super.key,
     required this.photoUrl,
     required this.description,
@@ -31,60 +30,22 @@ class PhotoDetailScreen extends StatefulWidget {
   });
 
   @override
-  _PhotoDetailScreenState createState() => _PhotoDetailScreenState();
+  _TrashDetailScreenState createState() => _TrashDetailScreenState();
 }
 
-class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
-  late bool _isFavorite;
+class _TrashDetailScreenState extends State<TrashDetailScreen> {
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _isFavorite = widget.isFavorite;
-    _fetchFavoriteStatus();
   }
 
-  Future<void> _fetchFavoriteStatus() async {
-    try {
-      final response = await http.get(Uri.parse(
-          '$baseUrl/photos/detail?id=${widget.id}&userId=${widget.userId}'));
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        setState(() {
-          _isFavorite = responseData['data']['isFavorite'];
-        });
-      } else {
-        showAlert(context, 'Failed to load favorite status', false);
-      }
-    } catch (e) {
-      showAlert(context, e.toString(), false);
-    }
-  }
+  Future<void> _restorePhoto() async {
+    setState(() {
+      _isLoading = true;
+    });
 
-  Future<void> _toggleFavorite() async {
-    final response = await http.patch(Uri.parse(
-        '$baseUrl/photos/favorite?id=${widget.id}&userId=${widget.userId}'));
-    final responseData = json.decode(response.body)['message'];
-    print(responseData);
-
-    try {
-      if (response.statusCode == 200) {
-        setState(() {
-          _isFavorite = !_isFavorite;
-        });
-
-        showAlert(context, responseData, true);
-      } else {
-        showAlert(context, responseData, false);
-      }
-    } catch (e) {
-      showAlert(context, e.toString(), false);
-    } finally {
-      _fetchFavoriteStatus();
-    }
-  }
-
-  Future<void> _addToTrash() async {
     final response = await http.patch(Uri.parse(
         '$baseUrl/photos/trash?id=${widget.id}&userId=${widget.userId}'));
     final responseData = json.decode(response.body)['message'];
@@ -92,7 +53,8 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       if (response.statusCode == 200) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(
+              builder: (context) => const HomeScreen()),
         );
         showAlert(context, responseData, true);
       } else {
@@ -100,6 +62,10 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       }
     } catch (e) {
       showAlert(context, e.toString(), false);
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -127,27 +93,6 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
         ),
         backgroundColor: Colors.blue,
         iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(
-            icon: Icon(
-              _isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: _isFavorite ? Colors.red : Colors.white,
-            ),
-            onPressed: _toggleFavorite,
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            color: Colors.white,
-            onPressed: () {
-              confirmPopupCenter(
-                  context,
-                  'Want to delete this photo?',
-                  'Photos will be moved to the trash and will be deleted within 7 days.',
-                  'Delete Photo',
-                  _addToTrash);
-            },
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -186,23 +131,13 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
               ),
             ),
             const SizedBox(height: 16),
-             if (widget.description != null && widget.description!.isNotEmpty)
+            if (widget.description.isNotEmpty)
               Text(
                 "Photo Description: ${widget.description}",
                 style: const TextStyle(
                   fontSize: 15.5,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w600,
-                ),
-              )
-            else
-              const Text(
-                "No description available",
-                style: TextStyle(
-                  fontSize: 14.5,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey,
                 ),
               ),
             Text(
@@ -244,25 +179,35 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: _toggleFavorite,
-              icon: Icon(
-                _isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: _isFavorite ? Colors.white : Colors.red,
-                size: 18,
-              ),
+              onPressed: _isLoading
+                  ? null
+                  : _restorePhoto,
+              icon: _isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.0,
+                      ),
+                    )
+                  : const Icon(
+                      Icons.restore_from_trash,
+                      color: Colors.white,
+                      size: 18,
+                    ),
               label: Text(
-                _isFavorite ? 'Added to favorite' : 'Add to favorite',
-                style: TextStyle(
+                _isLoading ? 'Loading...' : 'Restore',
+                style: const TextStyle(
                   fontSize: 14,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w500,
-                  color: _isFavorite ? Colors.white : Colors.red,
+                  color: Colors.white,
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _isFavorite ? Colors.red : Colors.transparent,
-                iconColor: _isFavorite ? Colors.white : Colors.red,
-                side: const BorderSide(color: Colors.red, width: 2.5),
+                backgroundColor: Colors.grey,
+                iconColor: Colors.grey,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(40),
                 ),

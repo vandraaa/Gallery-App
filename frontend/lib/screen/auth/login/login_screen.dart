@@ -9,7 +9,7 @@ import 'package:gallery_app/screen/auth/service/auth_service.dart';
 class SignInForm extends StatefulWidget {
   final VoidCallback onToggle;
 
-  SignInForm({required this.onToggle});
+  const SignInForm({super.key, required this.onToggle});
 
   @override
   _SignInFormState createState() => _SignInFormState();
@@ -31,7 +31,7 @@ class _SignInFormState extends State<SignInForm> {
     setState(() {
       _isLoading = true;
     });
-    final url = Uri.parse(baseUrl + '/users/login');
+    final url = Uri.parse('$baseUrl/users/login');
     final headers = {
       "Access-Control-Allow-Origin": "*",
       'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ class _SignInFormState extends State<SignInForm> {
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
 
         setState(() {
@@ -207,12 +207,12 @@ class _SignInFormState extends State<SignInForm> {
                           ),
                         ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 TextButton(
                   onPressed: widget.onToggle,
-                  child: Text(
+                  child: const Text(
                     "Belum punya akun? Daftar",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.w600,
                     ),

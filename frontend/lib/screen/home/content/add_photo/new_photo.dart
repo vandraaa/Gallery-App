@@ -10,7 +10,7 @@ import 'package:path/path.dart' as path;
 class AddPhotoScreen extends StatefulWidget {
   final int userId;
 
-  const AddPhotoScreen({Key? key, required this.userId}) : super(key: key);
+  const AddPhotoScreen({super.key, required this.userId});
 
   @override
   _AddPhotoScreenState createState() => _AddPhotoScreenState();
@@ -50,7 +50,7 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
     });
 
     try {
-      final url = Uri.parse(baseUrl + '/photos/upload');
+      final url = Uri.parse('$baseUrl/photos/upload');
 
       var request = http.MultipartRequest('POST', url);
 

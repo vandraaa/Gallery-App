@@ -8,7 +8,7 @@ class SignUpForm extends StatefulWidget {
   final VoidCallback onSignUpSucess;
   final VoidCallback onToggle;
 
-  SignUpForm({required this.onSignUpSucess, required this.onToggle});
+  const SignUpForm({super.key, required this.onSignUpSucess, required this.onToggle});
 
   @override
   _SignUpFormState createState() => _SignUpFormState();
@@ -32,7 +32,7 @@ class _SignUpFormState extends State<SignUpForm> {
     setState(() {
       _isLoading = true;
     });
-    final url = Uri.parse(baseUrl + '/users');
+    final url = Uri.parse('$baseUrl/users');
     final headers = {
       "Access-Control-Allow-Origin": "*",
       'Content-Type': 'application/json',
@@ -256,12 +256,12 @@ class _SignUpFormState extends State<SignUpForm> {
                         ),
                       ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               TextButton(
                 onPressed: widget.onToggle,
-                child: Text(
+                child: const Text(
                   "Sudah punya akun? Masuk",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w600,
                   ),

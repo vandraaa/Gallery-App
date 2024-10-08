@@ -7,7 +7,7 @@ import 'package:gallery_app/screen/auth/service/auth_service.dart';
 import 'package:gallery_app/screen/home/home_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -22,9 +22,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final Color blueAccentShade700 = Colors.blueAccent.withOpacity(0.8);
   final _formKey = GlobalKey<FormState>();
 
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void initState() {
@@ -61,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       isLoadingSubmit = true;
     });
 
-    final url = Uri.parse(baseUrl + '/users');
+    final url = Uri.parse('$baseUrl/users');
     final headers = {
       "Access-Control-Allow-Origin": "*",
       'Content-Type': 'application/json',
@@ -269,12 +269,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     enabled: false,
                   ),
-                  SizedBox(height: 3.0),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                  const SizedBox(height: 3.0),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 18.0),
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: const Text(
+                      child: Text(
                         "Email tidak dapat di ganti!",
                         style: TextStyle(
                           color: Colors.redAccent,

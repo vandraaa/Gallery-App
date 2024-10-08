@@ -6,6 +6,7 @@ import 'package:gallery_app/screen/auth/service/auth_service.dart';
 import 'package:gallery_app/screen/home/content/album_content.dart';
 import 'package:gallery_app/screen/home/content/favorite_content.dart';
 import 'package:gallery_app/screen/home/content/home_content.dart';
+import 'package:gallery_app/screen/home/content/trash_content.dart';
 import 'package:gallery_app/screen/profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -69,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 2:
         return FavoriteContent(userId: userId);
       case 3:
-        return const Center(child: Text('Trash Content'));
+        return TrashContent(userId: userId);
       default:
         return HomeContent(userId: userId);
     }
@@ -214,12 +215,12 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: Colors.blueAccent,
         unselectedItemColor: const Color.fromRGBO(158, 158, 158, 1),
         showUnselectedLabels: true,
-        selectedLabelStyle: TextStyle(
+        selectedLabelStyle: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
           fontFamily: 'Poppins',
         ),
-        unselectedLabelStyle: TextStyle(
+        unselectedLabelStyle: const TextStyle(
           fontSize: 10,
           fontFamily: 'Poppins',
         ),

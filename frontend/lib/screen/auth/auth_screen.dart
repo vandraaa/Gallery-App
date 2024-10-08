@@ -3,6 +3,8 @@ import 'login/login_screen.dart';
 import 'register/register_screen.dart';
 
 class AuthScreen extends StatefulWidget {
+  const AuthScreen({super.key});
+
   @override
   _AuthScreenState createState() => _AuthScreenState();
 }
@@ -57,7 +59,7 @@ class _AuthScreenState extends State<AuthScreen> {
                           height: constraints.maxHeight * 0.6,
                           child: PageView(
                             controller: _pageController,
-                            physics: NeverScrollableScrollPhysics(),
+                            physics: const NeverScrollableScrollPhysics(),
                             children: [
                               SignInForm(
                                 onToggle: _toggleView,

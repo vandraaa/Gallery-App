@@ -17,7 +17,7 @@ class HomeContent extends StatefulWidget {
 
 class _HomeContentState extends State<HomeContent> {
   bool _isFabVisible = true;
-  Map<String, List<dynamic>> _groupedPhotos = {};
+  final Map<String, List<dynamic>> _groupedPhotos = {};
   bool _isLoading = true;
   bool _isHavePhoto = true;
   final ScrollController _scrollController = ScrollController();
@@ -58,7 +58,7 @@ class _HomeContentState extends State<HomeContent> {
     _groupedPhotos.clear();
 
     final response = await http
-        .get(Uri.parse(baseUrl + '/photos?id=' + widget.userId.toString()));
+        .get(Uri.parse('$baseUrl/photos?id=${widget.userId}'));
 
     try {
       if (response.statusCode == 200) {
@@ -100,8 +100,8 @@ class _HomeContentState extends State<HomeContent> {
         dateTime.month == now.month &&
         dateTime.day == now.day - 1) {
       return 'Yesterday';
-    } else if (dateTime.isBefore(now.subtract(Duration(days: 7))) &&
-        dateTime.isAfter(now.subtract(Duration(days: 14)))) {
+    } else if (dateTime.isBefore(now.subtract(const Duration(days: 7))) &&
+        dateTime.isAfter(now.subtract(const Duration(days: 14)))) {
       return 'Last 7 days';
     } else {
       return DateFormat('dd MMMM yyyy').format(dateTime);
@@ -114,9 +114,9 @@ class _HomeContentState extends State<HomeContent> {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: _isLoading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : !_isHavePhoto
-                ? Center(
+                ? const Center(
                     child: Text(
                       "You don't have any photos",
                       style: TextStyle(
@@ -171,7 +171,7 @@ class _HomeContentState extends State<HomeContent> {
     List<Widget> photoWidgets = [];
     for (var date in _groupedPhotos.keys) {
       photoWidgets.add(
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
       );
 
       photoWidgets.add(

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:gallery_app/screen/home/content/detail_photo/detail_photo.dart';
+import 'package:gallery_app/screen/home/content/detail_trash/detail_trash.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:gallery_app/constant/constant.dart';
 
-class FavoriteContent extends StatefulWidget {
+class TrashContent extends StatefulWidget {
   final int userId;
-  const FavoriteContent({super.key, required this.userId});
+  const TrashContent({super.key, required this.userId});
 
   @override
-  State<FavoriteContent> createState() => _FavoriteContentState();
+  State<TrashContent> createState() => _TrashContentState();
 }
 
-class _FavoriteContentState extends State<FavoriteContent> {
+class _TrashContentState extends State<TrashContent> {
   bool _isFabVisible = true;
-  List<dynamic> _favoritePhotos = [];
+  List<dynamic> _trashPhotos = [];
   bool _isLoading = true;
   bool _isHavePhoto = true;
   final ScrollController _scrollController = ScrollController();
@@ -24,7 +24,7 @@ class _FavoriteContentState extends State<FavoriteContent> {
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
-    _fetchFavoritePhotos();
+    _fetchTrashPhotos();
   }
 
   @override
@@ -52,15 +52,15 @@ class _FavoriteContentState extends State<FavoriteContent> {
     }
   }
 
-  Future<void> _fetchFavoritePhotos() async {
+  Future<void> _fetchTrashPhotos() async {
     final response = await http.get(
-        Uri.parse('$baseUrl/photos/favorite?id=${widget.userId}'));
+        Uri.parse('$baseUrl/photos/trash?id=${widget.userId}'));
 
     try {
       if (response.statusCode == 200) {
         final decodedJson = json.decode(response.body);
         setState(() {
-          _favoritePhotos = decodedJson['data'];
+          _trashPhotos = decodedJson['data'];
           _isLoading = false;
         });
       } else {
@@ -84,7 +84,7 @@ class _FavoriteContentState extends State<FavoriteContent> {
           : !_isHavePhoto
               ? const Center(
                   child: Text(
-                    "You don't have favorite photos",
+                    "There is no photo in trash",
                     style: TextStyle(
                       fontSize: 15,
                       fontFamily: 'Poppins',
@@ -106,11 +106,11 @@ class _FavoriteContentState extends State<FavoriteContent> {
       const Padding(
         padding: EdgeInsets.symmetric(vertical: 16.0),
         child: Text(
-          "Your Favorite Photo",
+          "Photo will be deleted after 7 days",
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 14,
             fontFamily: 'Poppins',
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ),
@@ -126,36 +126,31 @@ class _FavoriteContentState extends State<FavoriteContent> {
             crossAxisSpacing: 8.0,
             mainAxisSpacing: 8.0,
           ),
-          itemCount: _favoritePhotos.length,
+          itemCount: _trashPhotos.length,
           itemBuilder: (context, index) {
-            var photo = _favoritePhotos[index];
+            var photo = _trashPhotos[index];
             return GestureDetector(
               onTap: () async {
-                await Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        PhotoDetailScreen(
-                      photoUrl: photo['url'],
-                      description: photo['description'],
-                      createdAt: photo['createdAt'],
-                      userId: photo['userId'],
-                      id: photo['photoId'],
-                      isFavorite: photo['isFavorite'],
-                      filename: photo['filename'],
-                      size: photo['size'],
+                  await Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          TrashDetailScreen(
+                        photoUrl: photo['url'],
+                        description: photo['description'],
+                        createdAt: photo['createdAt'],
+                        userId: photo['userId'],
+                        id: photo['photoId'],
+                        isFavorite: photo['isFavorite'],
+                        filename: photo['filename'],
+                        size: photo['size'],
+                      ),
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        return child;
+                      },
                     ),
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
-                      return child;
-                    },
-                  ),
-                );
-
-                setState(() {
-                  _isLoading = true;
-                });
-                await _fetchFavoritePhotos();
+                  );
               },
               child: Card(
                 elevation: 4,

@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> navigateToNextScreen() async {
     final AuthService authService = AuthService();
-    final String? token = await authService.getToken();
+    final String token = await authService.getToken();
 
     if (token != null && token.isNotEmpty) {
       final bool isExpired = await authService.isExpired(token);
@@ -96,8 +96,8 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 16.0),
               child: Text(
                 'Created by Kevin Andra',
                 style: TextStyle(
