@@ -2,13 +2,20 @@ const prisma = require("../config/database");
 
 const createAlbum = async (req, res) => {
     try {
-        const { userId, title, description } = req.body;
+        const { userId, title, description, photos } = req.body;
+
+        if (!photos || photos.length === 0) {
+            return res.status(400).send({ message: "Photos are required" });
+        }
 
         const album = await prisma.album.create({
             data: {
                 userId: parseInt(userId),
                 title: title,
-                description: description ? description : null
+                description: description ? description : null,
+                photos: {
+                    connect: photos.map(photo => ({ photoId: parseInt(photo) }))
+                }
             }
         });
 
@@ -45,18 +52,43 @@ const addPhotoToAlbum = async (req, res) => {
 
 const getAlbumsByUserId = async (req, res) => {
     try {
-        const userId = req.query.id;
+        const userId = req.params.id;
 
         const albums = await prisma.album.findMany({
             where: {
                 userId: parseInt(userId),
             },
             include: {
-                photos: true
+                photos: {
+                    take: 1,
+                    orderBy: {
+                        createdAt: 'desc'
+                    }
+                }
             }
         })
 
         res.status(200).send({ message: "Get albums successfully", data: albums });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ message: "Failed to get albums" });
+    }
+}
+
+const getPhotoFromAlbumId = async (req, res) => {
+    try {
+        const albumId = req.params.id;
+
+        const photos = await prisma.album.findUnique({
+            where: {
+                albumId: parseInt(albumId),
+            },
+            include: {
+                photos: true
+            }
+        })
+
+        res.status(200).send({ message: "Get photos from album successfully", data: photos });
     } catch (error) {
         console.log(error);
         res.status(500).send({ message: "Failed to get albums" });
@@ -113,6 +145,7 @@ module.exports ={
     createAlbum,
     addPhotoToAlbum,
     getAlbumsByUserId,
+    getPhotoFromAlbumId,
     removeFromAlbum,
     deleteAlbum
 }
