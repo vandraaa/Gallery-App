@@ -64,6 +64,11 @@ const getAlbumsByUserId = async (req, res) => {
                     orderBy: {
                         createdAt: 'desc'
                     }
+                },
+                _count: {
+                    select: {
+                        photos: true
+                    }
                 }
             }
         })
@@ -84,7 +89,12 @@ const getPhotoFromAlbumId = async (req, res) => {
                 albumId: parseInt(albumId),
             },
             include: {
-                photos: true
+                photos: true,
+                _count: {
+                    select: {
+                        photos: true
+                    }
+                }
             }
         })
 
