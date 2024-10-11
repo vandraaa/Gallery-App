@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> navigateToNextScreen() async {
     final AuthService authService = AuthService();
-    final String token = await authService.getToken();
+    final String? token = await authService.getToken();
 
     if (token != null && token.isNotEmpty) {
       final bool isExpired = await authService.isExpired(token);

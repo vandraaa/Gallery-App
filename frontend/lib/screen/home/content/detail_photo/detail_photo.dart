@@ -110,7 +110,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
 
   String _formatTime(String createdAt) {
     DateTime parsedDate = DateTime.parse(createdAt);
-    return DateFormat('HH:mm:ss').format(parsedDate);
+    return DateFormat('HH:mm').format(parsedDate);
   }
 
   @override
@@ -206,21 +206,12 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                 ),
               ),
             Text(
-              _formatDate(widget.createdAt),
+              '${_formatDate(widget.createdAt)} at ${_formatTime(widget.createdAt)}',
               style: const TextStyle(
                 fontSize: 14.5,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w600,
                 color: Color.fromARGB(255, 86, 85, 85),
-              ),
-            ),
-            Text(
-              _formatTime(widget.createdAt),
-              style: const TextStyle(
-                fontSize: 14,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w600,
-                color: Colors.grey,
               ),
             ),
             const SizedBox(height: 16),

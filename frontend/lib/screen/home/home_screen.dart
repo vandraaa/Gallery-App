@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return HomeContent(userId: userId);
       case 1:
-        return const AlbumContent();
+        return AlbumContent(userId: userId);
       case 2:
         return FavoriteContent(userId: userId);
       case 3:
