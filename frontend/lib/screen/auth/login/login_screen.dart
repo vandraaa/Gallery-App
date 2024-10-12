@@ -51,7 +51,7 @@ class _SignInFormState extends State<SignInForm> {
 
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => const HomeScreen(initialIndex: 0)),
         );
 
         setState(() {

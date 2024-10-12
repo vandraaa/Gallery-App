@@ -55,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return nameParts.map((e) => e[0]).join().toUpperCase();
   }
 
-  Future<void> updateUser(
+  Future<void> _updateUser(
       BuildContext context, String name, String email, String password) async {
     setState(() {
       isLoadingSubmit = true;
@@ -121,7 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final name = _nameController.text;
       final password = _passwordController.text;
 
-      updateUser(context, name, userEmail, password);
+      _updateUser(context, name, userEmail, password);
       print(
           "Updating profile with Name: $userName, Email: $userEmail, Password: $userPassword");
     }
@@ -337,7 +337,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         _formKey.currentState!.save();
-                        // _updateProfile();
                         confirmPopupCenter(
                           context, 
                           'Update Profile', 
@@ -384,7 +383,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Route _createRoute() {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) =>
-          const HomeScreen(),
+          const HomeScreen(initialIndex: 0),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 0.0);
         const end = Offset.zero;

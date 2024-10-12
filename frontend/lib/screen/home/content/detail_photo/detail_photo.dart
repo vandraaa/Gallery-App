@@ -92,7 +92,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       if (response.statusCode == 200) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          MaterialPageRoute(builder: (context) => const HomeScreen(initialIndex: 0)),
         );
         showAlert(context, responseData, true);
       } else {

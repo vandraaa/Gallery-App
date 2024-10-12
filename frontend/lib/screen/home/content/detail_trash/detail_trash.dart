@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_app/alert/alert.dart';
+import 'package:gallery_app/alert/confirmPopupCenter.dart';
 import 'package:gallery_app/constant/constant.dart';
 import 'package:gallery_app/screen/home/home_screen.dart';
 import 'package:intl/intl.dart';
@@ -35,6 +36,7 @@ class TrashDetailScreen extends StatefulWidget {
 
 class _TrashDetailScreenState extends State<TrashDetailScreen> {
   bool _isLoading = false;
+  bool _isLoadingDelete = false;
 
   @override
   void initState() {
@@ -54,17 +56,46 @@ class _TrashDetailScreenState extends State<TrashDetailScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => const HomeScreen()),
+              builder: (context) => const HomeScreen(initialIndex: 3)),
         );
         showAlert(context, responseData, true);
       } else {
         showAlert(context, responseData, false);
       }
     } catch (e) {
-      showAlert(context, e.toString(), false);
+      print(e);
+      showAlert(context, 'Failed to restore photo', false);
     } finally {
       setState(() {
         _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _deletePhoto() async {
+    setState(() {
+      _isLoadingDelete = true;
+    });
+
+    final url = '${baseUrl}/photos/delete?id=${widget.id}&userId=${widget.userId}';
+    try {
+      final response = await http.delete(Uri.parse(url));
+      final responseData = json.decode(response.body)['message'];
+      if (response.statusCode == 200) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen(initialIndex: 3)),
+        );
+        showAlert(context, responseData, true);
+      } else {
+        showAlert(context, responseData, false);
+      }
+    } catch (e) {
+      print(e);
+      showAlert(context, 'Failed to delete photo', false);
+    } finally {
+      setState(() {
+        _isLoadingDelete = false;
       });
     }
   }
@@ -179,9 +210,7 @@ class _TrashDetailScreenState extends State<TrashDetailScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: _isLoading
-                  ? null
-                  : _restorePhoto,
+              onPressed: _isLoading ? null : _restorePhoto,
               icon: _isLoading
                   ? const SizedBox(
                       width: 20,
@@ -208,6 +237,49 @@ class _TrashDetailScreenState extends State<TrashDetailScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey,
                 iconColor: Colors.grey,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                elevation: 0,
+              ),
+            ),
+            const SizedBox(height: 10.0),
+            ElevatedButton.icon(
+              onPressed: _isLoadingDelete
+                  ? null
+                  : () => confirmPopupCenter(
+                      context,
+                      'Are you sure',
+                      'Photos will be permanently deleted and cnn\'t be restored',
+                      'Delete',
+                      _deletePhoto
+                    ),
+              icon: _isLoadingDelete
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.0,
+                      ),
+                    )
+                  : const Icon(
+                      Icons.delete_forever,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+              label: Text(
+                _isLoadingDelete ? 'Deleting...' : 'Delete Permanently',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                iconColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(40),
                 ),

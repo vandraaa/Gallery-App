@@ -10,7 +10,8 @@ import 'package:gallery_app/screen/home/content/trash_content.dart';
 import 'package:gallery_app/screen/profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final int initialIndex;
+  const HomeScreen({super.key, required this.initialIndex});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -46,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadUserData();
+    _selectedIndex = widget.initialIndex;
   }
 
   void _handleLogout() async {
