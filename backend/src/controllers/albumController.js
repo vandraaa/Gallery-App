@@ -58,6 +58,9 @@ const getAlbumsByUserId = async (req, res) => {
             where: {
                 userId: parseInt(userId),
             },
+            orderBy: {
+                createdAt: 'desc'
+            },
             include: {
                 photos: {
                     take: 1,
