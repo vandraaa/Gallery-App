@@ -231,7 +231,7 @@ const trash = async (req, res) => {
                 isDelete: !photo.isDelete,
                 isFavorite: false,
                 album: {
-                    disconnect: true
+                    disconnect: []
                 }
             }
         })
