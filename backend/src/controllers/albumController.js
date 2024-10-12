@@ -66,6 +66,9 @@ const getAlbumsByUserId = async (req, res) => {
                     take: 1,
                     orderBy: {
                         createdAt: 'desc'
+                    },
+                    where: {
+                        isDelete: false
                     }
                 },
                 _count: {
@@ -95,7 +98,14 @@ const getPhotoFromAlbumId = async (req, res) => {
                 photos: true,
                 _count: {
                     select: {
-                        photos: true
+                        photos: {
+                            orderBy: {
+                                createdAt: desc
+                            },
+                            where: {
+                                isDelete: false
+                            }
+                        }
                     }
                 }
             }

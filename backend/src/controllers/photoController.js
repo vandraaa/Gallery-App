@@ -174,7 +174,7 @@ const deletePhoto = async (req, res) => {
         const photoId = req.query.id;
         const userId = req.query.userId;
 
-        const photo = await prisma.photo.findUnique({
+        const photo = await prisma.photo.findFirst({
             where: {
                 userId: parseInt(userId),
                 photoId: parseInt(photoId),
@@ -230,7 +230,9 @@ const trash = async (req, res) => {
             data: {
                 isDelete: !photo.isDelete,
                 isFavorite: false,
-                albumId: null
+                album: {
+                    disconnect: true
+                }
             }
         })
 
