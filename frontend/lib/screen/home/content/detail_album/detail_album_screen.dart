@@ -16,7 +16,12 @@ class DetailAlbumScreen extends StatefulWidget {
 
 class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
   bool _isLoading = false;
+  bool _isEditingTitle = false;
+  bool _isEditingDescription = false;
   Map<String, dynamic> _album = {};
+  
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
 
   Future<void> _fetchAlbum() async {
     setState(() {
@@ -24,6 +29,7 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
     });
 
     final url = Uri.parse('${baseUrl}/album/photo/${widget.albumId}');
+    print(widget.albumId);
 
     try {
       final response = await http.get(url);
@@ -32,7 +38,44 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
         final responseData = json.decode(response.body);
         setState(() {
           _album = responseData['data'];
+          _titleController.text = _album['title'] ?? '';
+          _descriptionController.text = _album['description'] ?? '';
           _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print(e);
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _updateAlbum() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final url = Uri.parse('${baseUrl}/album/update/${widget.albumId}');
+    final body = json.encode({
+      'title': _titleController.text,
+      'description': _descriptionController.text,
+    });
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        setState(() {
+          _album = responseData['data'];
+          _isEditingTitle = false;
+          _isEditingDescription = false;
         });
       }
     } catch (e) {
@@ -84,20 +127,60 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      _album['title'] ?? 'No title available',
-                      style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Poppins'),
-                    ),
-                    Text(
-                      _album['description'] ?? 'No description available',
-                      style: const TextStyle(
-                          fontSize: 16,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500),
-                    ),
+                    _isEditingTitle
+                        ? TextFormField(
+                            controller: _titleController,
+                            decoration: InputDecoration(
+                              labelText: 'Edit Title',
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.check),
+                                onPressed: _updateAlbum,
+                              ),
+                            ),
+                          )
+                        : GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _isEditingTitle = true;
+                              });
+                            },
+                            child: Text(
+                              _album['title'] ?? 'No title available',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ),
+                    const SizedBox(height: 8),
+                    _isEditingDescription
+                        ? TextFormField(
+                            controller: _descriptionController,
+                            decoration: InputDecoration(
+                              labelText: 'Edit Description',
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.check),
+                                onPressed: _updateAlbum,
+                              ),
+                            ),
+                          )
+                        : GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _isEditingDescription = true;
+                              });
+                            },
+                            child: Text(
+                              _album['description'] ??
+                                  'No description available',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
                     const SizedBox(height: 8),
                     Text(
                       'Created at: ${_formatDate(_album['createdAt'])} at ${_formatTime(_album['createdAt'])}',
@@ -132,10 +215,8 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
                                 onTap: () async {
                                   await Navigator.push(
                                     context,
-                                    PageRouteBuilder(
-                                      pageBuilder: (context, animation,
-                                              secondaryAnimation) =>
-                                          PhotoDetailScreen(
+                                    MaterialPageRoute(
+                                      builder: (context) => PhotoDetailScreen(
                                         photoUrl: photo['url'],
                                         description: photo['description'],
                                         createdAt: photo['createdAt'],
@@ -145,13 +226,8 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
                                         filename: photo['filename'],
                                         size: photo['size'],
                                       ),
-                                      transitionsBuilder: (context, animation,
-                                          secondaryAnimation, child) {
-                                        return child;
-                                      },
                                     ),
                                   );
-
                                   setState(() {
                                     _isLoading = true;
                                   });

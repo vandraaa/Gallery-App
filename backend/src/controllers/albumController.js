@@ -109,7 +109,7 @@ const getPhotoFromAlbumId = async (req, res) => {
 
     const photos = await prisma.album.findFirst({
       where: {
-        albumId: 4,
+        albumId: albumId,
       },
       include: {
         photos: {

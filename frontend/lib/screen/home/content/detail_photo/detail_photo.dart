@@ -260,6 +260,31 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                 elevation: 0,
               ),
             ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.add_photo_alternate_outlined,
+                color: Colors.white,
+                size: 18,
+              ),
+              label: const Text(
+                'Add to album',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                elevation: 0,
+              ),
+            ),
           ],
         ),
       ),

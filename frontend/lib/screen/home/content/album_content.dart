@@ -97,21 +97,19 @@ class _AlbumContentState extends State<AlbumContent> {
                 itemCount: _albums.length,
                 itemBuilder: (context, index) {
                   final album = _albums[index];
-                  final photo = album['photos'][0];
+                  final photo = album['photos'].isNotEmpty
+                      ? album['photos'][0]
+                      : {'url': 'https://via.placeholder.com/150'};
+
                   return GestureDetector(
                     onTap: () async {
+                      print(album['albumId']);
                       await Navigator.push(
                         context,
-                        PageRouteBuilder(
-                          pageBuilder:
-                              (context, animation, secondaryAnimation) =>
-                                  DetailAlbumScreen(
+                        MaterialPageRoute(
+                          builder: (context) => DetailAlbumScreen(
                             albumId: album['albumId'].toString(),
                           ),
-                          transitionsBuilder:
-                              (context, animation, secondaryAnimation, child) {
-                            return child;
-                          },
                         ),
                       );
                     },
@@ -133,32 +131,33 @@ class _AlbumContentState extends State<AlbumContent> {
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(8.0),
                             child: Align(
                               alignment: Alignment.bottomLeft,
                               child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      album['title'],
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12.0,
-                                        fontFamily: 'Poppins',
-                                      ),
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    album['title'],
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12.0,
+                                      fontFamily: 'Poppins',
                                     ),
-                                    Text(
-                                      album['_count']['photos'].toString(),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12.0,
-                                        fontFamily: 'Poppins',
-                                      ),
+                                  ),
+                                  Text(
+                                    album['_count']['photos'].toString(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12.0,
+                                      fontFamily: 'Poppins',
                                     ),
-                                  ]),
+                                  ),
+                                ],
+                              ),
                             ),
                           )
                         ],
@@ -170,19 +169,14 @@ class _AlbumContentState extends State<AlbumContent> {
             ),
       floatingActionButton: _isFabVisible
           ? FloatingActionButton(
-              backgroundColor: Colors.blue,
+              backgroundColor: const Color(0xFF2196F3),
               onPressed: () async {
                 final result = await Navigator.push(
                   context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        AddAlbumScreen(
+                  MaterialPageRoute(
+                    builder: (context) => AddAlbumScreen(
                       userId: widget.userId,
                     ),
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
-                      return child;
-                    },
                   ),
                 );
 
