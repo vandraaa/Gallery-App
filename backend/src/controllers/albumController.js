@@ -30,6 +30,21 @@ const addPhotoToAlbum = async (req, res) => {
   try {
     const { albumId, photoId } = req.body;
 
+    const isAdded = await prisma.album.findFirst({
+      where: {
+        albumId: parseInt(albumId),
+        photos: {
+          some: {
+            photoId: parseInt(photoId),
+          },
+        },
+      },
+    });
+
+    if (isAdded) {
+      return res.status(400).send({ message: "Photo already added to album" });
+    }
+
     const album = await prisma.photo.update({
       where: {
         photoId: parseInt(photoId),
@@ -169,6 +184,28 @@ const deleteAlbum = async (req, res) => {
   }
 };
 
+const updateAlbum = async (req, res) => {
+  try {
+    const albumId = req.params.id;
+    const { title, description } = req.body;
+
+    const album = await prisma.album.update({
+      where: {
+        albumId: parseInt(albumId),
+      },
+      data: {
+        title: title,
+        description: description ? description : null,
+      },
+    });
+
+    res.status(200).send({ message: "Update album successfully", data: album });
+  } catch (e) {
+    console.log(e);
+    res.status(500).send({ message: "Failed to update album" });
+  }
+}
+
 module.exports = {
   createAlbum,
   addPhotoToAlbum,
@@ -176,4 +213,5 @@ module.exports = {
   getPhotoFromAlbumId,
   removeFromAlbum,
   deleteAlbum,
+  updateAlbum
 };

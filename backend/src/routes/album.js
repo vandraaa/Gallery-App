@@ -9,5 +9,6 @@ router.get('/:id', album.getAlbumsByUserId);
 router.get('/photo/:id', album.getPhotoFromAlbumId);
 router.delete('/remove', album.removeFromAlbum);
 router.delete('/delete', album.deleteAlbum);
+router.patch('/update/:id', album.updateAlbum);
 
 module.exports = router
