@@ -1,174 +1,179 @@
 const prisma = require("../config/database");
 
 const createAlbum = async (req, res) => {
-    try {
-        const { userId, title, description, photos } = req.body;
+  try {
+    const { userId, title, description, photos } = req.body;
 
-        if (!photos || photos.length === 0) {
-            return res.status(400).send({ message: "Photos are required" });
-        }
-
-        const album = await prisma.album.create({
-            data: {
-                userId: parseInt(userId),
-                title: title,
-                description: description ? description : null,
-                photos: {
-                    connect: photos.map(photo => ({ photoId: parseInt(photo) }))
-                }
-            }
-        });
-
-        res.status(201).send({ message: "Create Album Successfully", data: album });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: "Failed to create album" });
+    if (!photos || photos.length === 0) {
+      return res.status(400).send({ message: "Photos are required" });
     }
-}
+
+    const album = await prisma.album.create({
+      data: {
+        userId: parseInt(userId),
+        title: title,
+        description: description ? description : null,
+        photos: {
+          connect: photos.map((photo) => ({ photoId: parseInt(photo) })),
+        },
+      },
+    });
+
+    res.status(201).send({ message: "Create Album Successfully", data: album });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Failed to create album" });
+  }
+};
 
 const addPhotoToAlbum = async (req, res) => {
-    try {
-        const { albumId, photoId } = req.body;
+  try {
+    const { albumId, photoId } = req.body;
 
-        const album = await prisma.photo.update({
-            where: {
-                photoId: parseInt(photoId),
-            },
-            data: {
-                album: {
-                    connect: {
-                        albumId: parseInt(albumId),
-                    }
-                }
-            }
-        })
+    const album = await prisma.photo.update({
+      where: {
+        photoId: parseInt(photoId),
+      },
+      data: {
+        album: {
+          connect: {
+            albumId: parseInt(albumId),
+          },
+        },
+      },
+    });
 
-        res.status(200).send({ message: "Add photo to album successfully", data: album });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: "Failed to add photo to album" });
-    }
-}
+    res
+      .status(200)
+      .send({ message: "Add photo to album successfully", data: album });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Failed to add photo to album" });
+  }
+};
 
 const getAlbumsByUserId = async (req, res) => {
-    try {
-        const userId = req.params.id;
+  try {
+    const userId = req.params.id;
 
-        const albums = await prisma.album.findMany({
-            where: {
-                userId: parseInt(userId),
-            },
-            orderBy: {
-                createdAt: 'desc'
-            },
-            include: {
-                photos: {
-                    take: 1,
-                    orderBy: {
-                        createdAt: 'desc'
-                    },
-                    where: {
-                        isDelete: false
-                    }
-                },
-                _count: {
-                    select: {
-                        photos: true
-                    }
-                }
-            }
-        })
+    const albums = await prisma.album.findMany({
+      where: {
+        userId: parseInt(userId),
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        photos: {
+          take: 1,
+          orderBy: {
+            createdAt: "desc",
+          },
+          where: {
+            isDelete: false,
+          },
+        },
+        _count: {
+          select: {
+            photos: true,
+          },
+        },
+      },
+    });
 
-        res.status(200).send({ message: "Get albums successfully", data: albums });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: "Failed to get albums" });
-    }
-}
+    res.status(200).send({ message: "Get albums successfully", data: albums });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Failed to get albums" });
+  }
+};
 
 const getPhotoFromAlbumId = async (req, res) => {
-    try {
-        const albumId = req.params.id;
+  try {
+    const albumId = req.params.id;
 
-        const photos = await prisma.album.findUnique({
-            where: {
-                albumId: parseInt(albumId),
-            },
-            include: {
-                photos: true,
-                _count: {
-                    select: {
-                        photos: {
-                            orderBy: {
-                                createdAt: desc
-                            },
-                            where: {
-                                isDelete: false
-                            }
-                        }
-                    }
-                }
-            }
-        })
+    const photos = await prisma.album.findFirst({
+      where: {
+        albumId: 4,
+      },
+      include: {
+        photos: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          where: {
+            isDelete: false,
+          },
+        },
+        _count: {
+          select: {
+            photos: true,
+          },
+        },
+      },
+    });
 
-        res.status(200).send({ message: "Get photos from album successfully", data: photos });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: "Failed to get albums" });
-    }
-}
+    res
+      .status(200)
+      .send({ message: "Get photos from album successfully", data: photos });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Failed to get albums" });
+  }
+};
 
 const removeFromAlbum = async (req, res) => {
-    try {
-        const albumId = req.query.id;
-        const photoId = req.query.photoId;
+  try {
+    const albumId = req.query.id;
+    const photoId = req.query.photoId;
 
-        const album = await prisma.photo.update({
-            where: {
-                photoId: parseInt(photoId),
-            },
-            data: {
-                album: {
-                    disconnect: {
-                        albumId: parseInt(albumId)
-                    }
-                }
-            }
-        })
+    const album = await prisma.photo.update({
+      where: {
+        photoId: parseInt(photoId),
+      },
+      data: {
+        album: {
+          disconnect: {
+            albumId: parseInt(albumId),
+          },
+        },
+      },
+    });
 
-        res.status(200).send({ message: "Remove photo from album successfully", data: album });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: "Failed to remove photo from album" });
-    }
-}
+    res
+      .status(200)
+      .send({ message: "Remove photo from album successfully", data: album });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Failed to remove photo from album" });
+  }
+};
 
 const deleteAlbum = async (req, res) => {
-    try {
-        const albumId = req.query.id;
+  try {
+    const albumId = req.query.id;
 
-        const album = await prisma.album.delete({
-            where: {
-                albumId: parseInt(albumId),
-            },
-            include: {
-                photos: true
-            }
-        })
+    const album = await prisma.album.delete({
+      where: {
+        albumId: parseInt(albumId),
+      },
+      include: {
+        photos: true,
+      },
+    });
 
-        res.status(200).send({ message: "Delete album successfully", data: album });
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({ message: "Failed to delete album" });
-    }
-}
+    res.status(200).send({ message: "Delete album successfully", data: album });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Failed to delete album" });
+  }
+};
 
-
-module.exports ={
-    createAlbum,
-    addPhotoToAlbum,
-    getAlbumsByUserId,
-    getPhotoFromAlbumId,
-    removeFromAlbum,
-    deleteAlbum
-}
+module.exports = {
+  createAlbum,
+  addPhotoToAlbum,
+  getAlbumsByUserId,
+  getPhotoFromAlbumId,
+  removeFromAlbum,
+  deleteAlbum,
+};
