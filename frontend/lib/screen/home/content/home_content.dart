@@ -217,6 +217,7 @@ class _HomeContentState extends State<HomeContent> {
                         isFavorite: photo['isFavorite'],
                         filename: photo['filename'],
                         size: photo['size'],
+                        albumId: null,
                       ),
                       transitionsBuilder:
                           (context, animation, secondaryAnimation, child) {

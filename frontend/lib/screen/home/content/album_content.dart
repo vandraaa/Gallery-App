@@ -105,10 +105,18 @@ class _AlbumContentState extends State<AlbumContent> {
                     onTap: () async {
                       await Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => DetailAlbumScreen(
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  DetailAlbumScreen(
                             albumId: album['albumId'].toString(),
                           ),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            return child;
+                          },
+                          transitionDuration: Duration.zero,
+                          reverseTransitionDuration: Duration.zero
                         ),
                       );
                     },

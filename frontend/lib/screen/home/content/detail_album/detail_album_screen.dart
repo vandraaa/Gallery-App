@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_app/alert/alert.dart';
+import 'package:gallery_app/alert/confirmPopupCenter.dart';
 import 'package:gallery_app/constant/constant.dart';
 import 'package:gallery_app/screen/home/content/detail_photo/detail_photo.dart';
+import 'package:gallery_app/screen/home/home_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
@@ -23,6 +25,7 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
   Map<String, dynamic> _album = {};
 
   bool _isFabVisible = true;
+  bool _isLoadingDelete = false;
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -100,6 +103,34 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _deleteAlbum() async {
+    setState(() {
+      _isLoadingDelete = true;
+    });
+
+    try {
+      final response = await http
+          .delete(Uri.parse('${baseUrl}/album/delete?id=${widget.albumId}'));
+      final responseData = json.decode(response.body);
+      final message = responseData['message'];
+
+      if (response.statusCode == 200) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  HomeScreen(initialIndex: 1),
+            ));
+        showAlert(context, message, true);
+      } else {
+        showAlert(context, message, false);
+      }
+    } catch (e) {
+      print(e);
+      showAlert(context, 'Failed to delete album', false);
     }
   }
 
@@ -230,15 +261,74 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
                                         ),
                                         child: Padding(
                                           padding: const EdgeInsets.all(12.0),
-                                          child: Text(
-                                            _album['title'] ??
-                                                'No title available',
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.white,
-                                              fontFamily: 'Poppins',
-                                            ),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text(
+                                                    _album['title'] ??
+                                                        'No title available',
+                                                    style: const TextStyle(
+                                                      fontSize: 20,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Colors.white,
+                                                      fontFamily: 'Poppins',
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    '${_album['_count']?['photos'] ?? 0} photos',
+                                                    style: const TextStyle(
+                                                      fontSize: 14,
+                                                      color: Colors.white,
+                                                      fontFamily: 'Poppins',
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: _isLoadingDelete
+                                                    ? null
+                                                    : () {
+                                                        confirmPopupCenter(
+                                                          context,
+                                                          'Want to delete this album?',
+                                                          'The album will be permanently deleted and can\'t be recovered.',
+                                                          'Delete',
+                                                          _deleteAlbum,
+                                                        );
+                                                      },
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      Colors.redAccent,
+                                                  shape: const CircleBorder(),
+                                                  padding:
+                                                      const EdgeInsets.all(8),
+                                                ),
+                                                child: _isLoadingDelete
+                                                    ? const SizedBox(
+                                                        width: 24,
+                                                        height: 24,
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                          valueColor:
+                                                              AlwaysStoppedAnimation<
+                                                                      Color>(
+                                                                  Colors.white),
+                                                          strokeWidth: 2.0,
+                                                        ),
+                                                      )
+                                                    : const Icon(Icons.delete,
+                                                        color: Colors.white),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
@@ -360,6 +450,7 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
                                             isFavorite: photo['isFavorite'],
                                             filename: photo['filename'],
                                             size: photo['size'],
+                                            albumId: _album['albumId'],
                                           ),
                                         ),
                                       );

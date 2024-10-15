@@ -86,7 +86,7 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
         showAlert(context, jsonResponse['message'], false);
       }
     } catch (e) {
-      print('Exception: $e'); // Tambahkan ini
+      print('Exception: $e');
       showAlert(context, 'An error occurred. Please try again.', false);
     } finally {
       setState(() {

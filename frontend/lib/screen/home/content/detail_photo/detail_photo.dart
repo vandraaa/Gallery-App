@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gallery_app/alert/alert.dart';
 import 'package:gallery_app/alert/confirmPopupCenter.dart';
 import 'package:gallery_app/constant/constant.dart';
+import 'package:gallery_app/screen/home/content/detail_album/detail_album_screen.dart';
 import 'package:gallery_app/screen/home/home_screen.dart';
 import 'package:gallery_app/screen/home/service/download_photo.dart';
 import 'package:intl/intl.dart';
@@ -18,6 +19,7 @@ class PhotoDetailScreen extends StatefulWidget {
   final bool isFavorite;
   final String filename;
   final String size;
+  final int? albumId;
 
   const PhotoDetailScreen({
     super.key,
@@ -29,6 +31,7 @@ class PhotoDetailScreen extends StatefulWidget {
     required this.isFavorite,
     required this.filename,
     required this.size,
+    required this.albumId,
   });
 
   @override
@@ -102,6 +105,71 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       }
     } catch (e) {
       showAlert(context, e.toString(), false);
+    }
+  }
+
+  Future<void> _removePhotoFromAlbum() async {
+    final response = await http.delete(Uri.parse(
+      '${baseUrl}/album/remove?id=${widget.albumId}&photoId=${widget.id}',
+    ));
+    final responseData = json.decode(response.body)['message'];
+    try {
+      if (response.statusCode == 200) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  DetailAlbumScreen(albumId: widget.albumId.toString()),
+            ));
+        showAlert(context, responseData, true);
+      } else {
+        showAlert(context, responseData, false);
+      }
+    } catch (e) {
+      print(e);
+      showAlert(context, e.toString(), false);
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchAlbums() async {
+    try {
+      final response =
+          await http.get(Uri.parse('$baseUrl/album/${widget.userId}'));
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body)['data'] as List;
+        return responseData.cast<Map<String, dynamic>>();
+      } else {
+        showAlert(context, 'Failed to load albums', false);
+        return [];
+      }
+    } catch (e) {
+      showAlert(context, e.toString(), false);
+      return [];
+    }
+  }
+
+  Future<void> _addToAlbum(int albumId) async {
+    final url = Uri.parse('${baseUrl}/album/add');
+    final body = json.encode({
+      "photoId": widget.id,
+      "albumId": albumId,
+    });
+    final headers = {
+      "Access-Control-Allow-Origin": "*",
+      'Content-Type': 'application/json',
+      'Accept': '*/*',
+    };
+    try {
+      final response = await http.patch(url, headers: headers, body: body);
+      final responseData = json.decode(response.body)['message'];
+      if (response.statusCode == 200) {
+        showAlert(context, responseData, true);
+      } else {
+        showAlert(context, responseData, false);
+      }
+    } catch (e) {
+      print(e);
+      showAlert(context, 'Failed to add photo to album', false);
     }
   }
 
@@ -288,15 +356,92 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
             ),
             const SizedBox(height: 8),
             ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(
-                Icons.add_photo_alternate_outlined,
+              onPressed: () async {
+                if (widget.albumId != null) {
+                  confirmPopupCenter(
+                    context,
+                    'Remove from Album',
+                    'Are you sure you want to remove this photo from the album?',
+                    'Remove Photo',
+                    _removePhotoFromAlbum,
+                  );
+                } else {
+                  List<Map<String, dynamic>> albums = await _fetchAlbums();
+                  if (albums.isNotEmpty) {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Select Album',
+                              style: TextStyle(
+                                  fontSize: 16,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500)),
+                          content: Container(
+                            width: double.maxFinite,
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: albums.length,
+                              itemBuilder: (context, index) {
+                                final album = albums[index];
+                                final photo = album['photos'].isNotEmpty
+                                    ? album['photos'][0]
+                                    : null;
+                                final totalPhotos = album['_count']['photos'];
+
+                                return ListTile(
+                                  contentPadding:
+                                      EdgeInsets.symmetric(vertical: 2),
+                                  leading: photo != null
+                                      ? Image.network(
+                                          photo['url'],
+                                          width: 50,
+                                          height: 50,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Icon(Icons.photo_album, size: 50),
+                                  title: Text(
+                                    album['title'],
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    'Total Photos: $totalPhotos',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    _addToAlbum(album['albumId']);
+                                    Navigator.pop(context);
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  } else {
+                    showAlert(context, 'No albums available', false);
+                  }
+                }
+              },
+              icon: Icon(
+                widget.albumId != null
+                    ? Icons.delete_forever_outlined
+                    : Icons.add_photo_alternate_outlined,
                 color: Colors.white,
                 size: 18,
               ),
-              label: const Text(
-                'Add to album',
-                style: TextStyle(
+              label: Text(
+                widget.albumId != null ? 'Remove from album' : 'Add to album',
+                style: const TextStyle(
                   fontSize: 14,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w500,
@@ -304,7 +449,8 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
+                backgroundColor:
+                    widget.albumId != null ? Colors.red : Colors.blue,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(40),
                 ),

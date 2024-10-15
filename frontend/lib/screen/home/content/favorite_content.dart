@@ -144,6 +144,7 @@ class _FavoriteContentState extends State<FavoriteContent> {
                       isFavorite: photo['isFavorite'],
                       filename: photo['filename'],
                       size: photo['size'],
+                      albumId: null,
                     ),
                     transitionsBuilder:
                         (context, animation, secondaryAnimation, child) {
