@@ -33,6 +33,7 @@ model Photo {
   createdAt   DateTime @default(now())
   albumId     Int?
   isDelete    Boolean  @default(false)
+  deletedAt   DateTime?
   isFavorite  Boolean  @default(false)
   user        User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
   album       Album[]

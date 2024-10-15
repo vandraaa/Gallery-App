@@ -1,6 +1,7 @@
 const prisma = require("../config/database");
 const multer = require('multer');
 const admin = require('firebase-admin');
+const cron = require('node-cron');
 
 const serviceAccount = require('../../serviceAccountKey.json');
 const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
@@ -9,6 +10,39 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     storageBucket: storageBucket
 });
+
+cron.schedule('* * * * *', async () => {
+    const now = new Date();
+    // const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+    const oneMinuteAgo = new Date(now.setMinutes(now.getMinutes() - 1));
+
+    try {
+        const photos = await prisma.photo.findMany({
+            where: {
+                isDelete: true,
+                deletedAt: {
+                    gte: oneMinuteAgo
+                }
+            }
+        })
+
+        const bucket = admin.storage().bucket();
+        for (const photo of photos) {
+            const fileName = photo.url.split('/o/')[1].split('?')[0];
+            const decodedFileName = decodeURIComponent(fileName);
+            const file = bucket.file(`images/${decodedFileName}`);
+
+            await file.delete();
+            await prisma.photo.delete({
+                where: {
+                    photoId: photo.photoId
+                }
+            })
+        }
+    } catch (e) {
+        console.log(e);
+    }
+})
 
 const uploadImageToFirebase = async (file) => {
     try {
@@ -230,6 +264,7 @@ const trash = async (req, res) => {
             data: {
                 isDelete: !photo.isDelete,
                 isFavorite: false,
+                deletedAt: photo.isDelete === false ? new Date() : null,
                 album: {
                     disconnect: []
                 }
