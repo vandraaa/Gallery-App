@@ -13,8 +13,8 @@ admin.initializeApp({
 
 cron.schedule('* * * * *', async () => {
     const now = new Date();
-    // const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
-    const oneMinuteAgo = new Date(now.getTime() - 1 * 60 * 1000)
+    const oneMinuteAgo = new Date(now.getTime() - 1 * 60 * 1000);
+    console.log('Cron job started at', now);
 
     try {
         const photos = await prisma.photo.findMany({
@@ -24,7 +24,8 @@ cron.schedule('* * * * *', async () => {
                     gte: oneMinuteAgo
                 }
             }
-        })
+        });
+        console.log('Photos to delete:', photos);
 
         const bucket = admin.storage().bucket();
         for (const photo of photos) {
@@ -33,16 +34,19 @@ cron.schedule('* * * * *', async () => {
             const file = bucket.file(`images/${decodedFileName}`);
 
             await file.delete();
+            console.log(`File deleted: ${decodedFileName}`);
+            
             await prisma.photo.delete({
                 where: {
                     photoId: photo.photoId
                 }
-            })
+            });
+            console.log(`Photo record deleted: ${photo.photoId}`);
         }
     } catch (e) {
-        console.log(e);
+        console.error('Error in cron job:', e);
     }
-})
+});
 
 const uploadImageToFirebase = async (file) => {
     try {
