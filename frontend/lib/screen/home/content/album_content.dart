@@ -103,7 +103,6 @@ class _AlbumContentState extends State<AlbumContent> {
 
                   return GestureDetector(
                     onTap: () async {
-                      print(album['albumId']);
                       await Navigator.push(
                         context,
                         MaterialPageRoute(

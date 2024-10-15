@@ -159,6 +159,7 @@ class _AddAlbumContent extends State<AddAlbumScreen> {
                   ),
                   keyboardType: TextInputType.text,
                 ),
+                const SizedBox(height: 20.0),
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {

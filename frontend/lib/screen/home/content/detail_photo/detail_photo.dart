@@ -3,6 +3,7 @@ import 'package:gallery_app/alert/alert.dart';
 import 'package:gallery_app/alert/confirmPopupCenter.dart';
 import 'package:gallery_app/constant/constant.dart';
 import 'package:gallery_app/screen/home/home_screen.dart';
+import 'package:gallery_app/screen/home/service/download_photo.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -92,7 +93,8 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
       if (response.statusCode == 200) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen(initialIndex: 0)),
+          MaterialPageRoute(
+              builder: (context) => const HomeScreen(initialIndex: 0)),
         );
         showAlert(context, responseData, true);
       } else {
@@ -186,7 +188,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
               ),
             ),
             const SizedBox(height: 16),
-             if (widget.description != null && widget.description!.isNotEmpty)
+            if (widget.description != null && widget.description!.isNotEmpty)
               Text(
                 "Photo Description: ${widget.description}",
                 style: const TextStyle(
@@ -215,23 +217,47 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              "Filename: ${widget.filename}",
-              style: const TextStyle(
-                fontSize: 14,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
-            ),
-            Text(
-              "Size: ${widget.size}",
-              style: const TextStyle(
-                fontSize: 14,
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w500,
-                color: Colors.grey,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start, // Aligns text to the left
+                  children: [
+                    Text(
+                      "Filename: ${widget.filename}",
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    Text(
+                      "Size: ${widget.size}",
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                IconButton(
+                  icon: const Icon(Icons.download_rounded, color: Colors.blue),
+                  onPressed: () {
+                    confirmPopupCenter(
+                      context,
+                      'Download',
+                      'Are you sure you want to download this photo?',
+                      'Download Photo',
+                      () => downloadPhoto(
+                          context, widget.photoUrl, widget.filename),
+                    );
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
@@ -260,7 +286,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                 elevation: 0,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             ElevatedButton.icon(
               onPressed: () {},
               icon: const Icon(
