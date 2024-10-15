@@ -14,7 +14,7 @@ admin.initializeApp({
 cron.schedule('* * * * *', async () => {
     const now = new Date();
     // const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
-    const oneMinuteAgo = new Date(now.setMinutes(now.getMinutes() - 1));
+    const oneMinuteAgo = new Date(now.getTime() - 1 * 60 * 1000)
 
     try {
         const photos = await prisma.photo.findMany({
