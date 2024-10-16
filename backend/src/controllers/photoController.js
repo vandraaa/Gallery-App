@@ -253,10 +253,27 @@ const trash = async (req, res) => {
             where: {
                 userId: parseInt(userId),
                 photoId: parseInt(photoId),
+            },
+        });
+
+        const disconnectedAlbum = await prisma.album.updateMany({
+            where: {
+                photos: {
+                    some: {
+                        photoId: parseInt(photoId),
+                    } 
+                },
+            },
+            data: {
+                photos: {
+                    disconnect: {
+                        photoId: parseInt(photoId),
+                    }
+                }
             }
         })
 
-        if(!photo) {
+        if (!photo) {
             return res.status(400).send({ message: "Photo not found" });
         }
 
@@ -269,16 +286,13 @@ const trash = async (req, res) => {
                 isDelete: !photo.isDelete,
                 isFavorite: false,
                 deletedAt: photo.isDelete === false ? new Date() : null,
-                album: {
-                    disconnect: []
-                }
             }
-        })
+        });
 
         if (photo.isDelete === true) {
             return res.status(200).send({ message: "Successfully restored", data });
         } else {
-            return res.status(200).send({ message: "Successfully deleted", data });
+            return res.status(200).send({ message: "Successfully deleted and albums disconnected", data });
         }
     } catch (error) {
         console.log(error);
