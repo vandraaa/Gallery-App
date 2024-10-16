@@ -13,7 +13,7 @@ admin.initializeApp({
 
 cron.schedule('* * * * *', async () => {
     const now = new Date();
-    const oneMinuteAgo = new Date(now.getTime() - 1 * 60 * 1000);
+    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
     console.log('Cron job started at', now);
 
     try {
@@ -21,7 +21,7 @@ cron.schedule('* * * * *', async () => {
             where: {
                 isDelete: true,
                 deletedAt: {
-                    gte: oneMinuteAgo
+                    gte: fiveMinutesAgo
                 }
             }
         });
@@ -31,7 +31,7 @@ cron.schedule('* * * * *', async () => {
         for (const photo of photos) {
             const fileName = photo.url.split('/o/')[1].split('?')[0];
             const decodedFileName = decodeURIComponent(fileName);
-            const file = bucket.file(`images/${decodedFileName}`);
+            const file = bucket.file(decodedFileName);
 
             await file.delete();
             console.log(`File deleted: ${decodedFileName}`);
