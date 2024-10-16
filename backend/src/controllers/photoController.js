@@ -332,5 +332,6 @@ module.exports = {
     trash, 
     favoritePhoto,
     getFavoritePhoto,
-    getTrashPhoto
+    getTrashPhoto,
+    cron
 }
