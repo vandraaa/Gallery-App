@@ -1,51 +1,57 @@
-import { NextResponse } from 'next/server';
 import prisma from '../config/database';
 import admin from 'firebase-admin'; 
 import serviceAccount from '../../serviceAccountKey.json';
 
 const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
 
-admin.initializeApp({
+if (!admin.apps.length) {
+  admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     storageBucket: storageBucket
-});
+  });
+}
 
-export async function GET() {
-    const now = new Date();
-    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
-    console.log('Scheduled function started at', now);
+export default async function deletePhotoInTrash(req, res) {
+  // Cron job authorization (optional)
+  const authHeader = req.headers['authorization'];
+  if (!authHeader || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
 
-    try {
-        const photos = await prisma.photo.findMany({
-            where: {
-                isDelete: true,
-                deletedAt: {
-                    gte: fiveMinutesAgo
-                }
-            }
-        });
-        console.log('Photos to delete:', photos);
+  const now = new Date();
+  const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
+  console.log('Scheduled function started at', now);
 
-        const bucket = admin.storage().bucket();
-        for (const photo of photos) {
-            const fileName = photo.url.split('/o/')[1].split('?')[0];
-            const decodedFileName = decodeURIComponent(fileName);
-            const file = bucket.file(decodedFileName);
-
-            await file.delete();
-            console.log(`File deleted: ${decodedFileName}`);
-            
-            await prisma.photo.delete({
-                where: {
-                    photoId: photo.photoId
-                }
-            });
-            console.log(`Photo record deleted: ${photo.photoId}`);
+  try {
+    const photos = await prisma.photo.findMany({
+      where: {
+        isDelete: true,
+        deletedAt: {
+          gte: fiveMinutesAgo
         }
-    } catch (e) {
-        console.error('Error in scheduled function:', e);
-        return NextResponse.json({ error: 'Failed to delete photos' }, { status: 500 });
+      }
+    });
+
+    const bucket = admin.storage().bucket();
+    for (const photo of photos) {
+      const fileName = photo.url.split('/o/')[1].split('?')[0];
+      const decodedFileName = decodeURIComponent(fileName);
+      const file = bucket.file(decodedFileName);
+
+      await file.delete();
+      console.log(`File deleted: ${decodedFileName}`);
+      
+      await prisma.photo.delete({
+        where: {
+          photoId: photo.photoId
+        }
+      });
+      console.log(`Photo record deleted: ${photo.photoId}`);
     }
 
-    return NextResponse.json({ message: 'Photos deleted successfully' }, { status: 200 });
+    return res.status(200).json({ message: 'Photos deleted successfully' });
+  } catch (e) {
+    console.error('Error in cron job:', e);
+    return res.status(500).json({ error: 'Failed to delete photos' });
+  }
 }
