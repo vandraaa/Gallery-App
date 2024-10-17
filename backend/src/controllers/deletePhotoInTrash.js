@@ -1,4 +1,4 @@
-const prisma = require("./config/database");
+const prisma = require("../config/database");
 const admin = require('firebase-admin');
 const serviceAccount = require('./serviceAccountKey.json');
 const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
