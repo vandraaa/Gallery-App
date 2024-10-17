@@ -33,7 +33,7 @@ jobs:
 
     # Run the cron job
     - name: Run Cron Job
-      run: node ./backend/src/controllers/deletePhotoInTrash.js
+      run: node ./src/controllers/deletePhotoInTrash.js
 
     # Optional: Notify if the cron job fails
     - name: Notify failure
