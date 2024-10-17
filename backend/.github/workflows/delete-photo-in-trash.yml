@@ -1,0 +1,34 @@
+name: Delete Photos Cron Job
+
+on:
+  schedule:
+    # Jalankan setiap 5 menit
+    - cron: '*/5 * * * *'
+
+jobs:
+  delete-photos:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Check out the repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # Set up Node.js environment
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    # Install dependencies
+    - name: Install dependencies
+      run: npm install
+
+    # Run the cron job
+    - name: Run Cron Job
+      run: node ./src/controllers/deletePhotoInTrash.js
+
+    # Optional: Notify if the cron job fails
+    - name: Notify failure
+      if: failure()
+      run: echo "The cron job failed"
