@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
-import prisma from '../config/database';
-import admin from 'firebase-admin'; 
-import serviceAccount from '../../serviceAccountKey.json';
+const { NextResponse } = require('next/server');
+const prisma = require('../config/database');
+const admin = require('firebase-admin'); 
+const serviceAccount = require('../../serviceAccountKey.json');
 
 const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
 
