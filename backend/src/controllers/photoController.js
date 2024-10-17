@@ -1,7 +1,6 @@
 const prisma = require("../config/database");
 const multer = require('multer');
 const admin = require('firebase-admin');
-const cron = require('node-cron');
 
 const serviceAccount = require('../../serviceAccountKey.json');
 const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
