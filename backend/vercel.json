@@ -7,15 +7,9 @@
     }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "src/app.js"
-    }
-  ],
-  "crons": [
-    {
-      "path": "/photos/delete-photo",
-      "schedule": "5 * * * *"
-    }
+      {
+          "src": "/(.*)",
+          "dest": "src/app.js"
+      }
   ]
 }
