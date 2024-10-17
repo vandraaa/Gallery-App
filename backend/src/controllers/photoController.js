@@ -11,7 +11,7 @@ admin.initializeApp({
     storageBucket: storageBucket
 });
 
-cron.schedule('* * * * *', async () => {
+cron.schedule('5 * * * *', async () => {
     const now = new Date();
     const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
     console.log('Cron job started at', now);
@@ -246,59 +246,67 @@ const deletePhoto = async (req, res) => {
 
 const trash = async (req, res) => {
     try {
-        const photoId = req.query.id;
-        const userId = req.query.userId;
+        const { id: photoId, userId } = req.query;
+
+        if (!photoId || !userId) {
+            return res.status(400).send({ message: "Invalid photo or user ID" });
+        }
 
         const photo = await prisma.photo.findUnique({
             where: {
-                userId: parseInt(userId),
                 photoId: parseInt(photoId),
+            },
+            include: {
+                album: true,
             },
         });
 
-        const disconnectedAlbum = await prisma.album.updateMany({
-            where: {
-                photos: {
-                    some: {
-                        photoId: parseInt(photoId),
-                    } 
-                },
-            },
-            data: {
-                photos: {
-                    disconnect: {
-                        photoId: parseInt(photoId),
-                    }
-                }
-            }
-        })
-
-        if (!photo) {
-            return res.status(400).send({ message: "Photo not found" });
+        if (!photo || photo.userId !== parseInt(userId)) {
+            return res.status(404).send({ message: "Photo not found or does not belong to the user" });
         }
 
-        const data = await prisma.photo.update({
+        // Jika photo belum dihapus dan memiliki album, lakukan disconnect dari album
+        if (!photo.isDelete && photo.album.length > 0) {
+            // Loop untuk disconnect setiap album yang terkait
+            for (const album of photo.album) {
+                await prisma.album.update({
+                    where: {
+                        albumId: album.albumId,
+                    },
+                    data: {
+                        photos: {
+                            disconnect: {
+                                photoId: photo.photoId,
+                            },
+                        },
+                    },
+                });
+            }
+        }
+
+        const updatedPhoto = await prisma.photo.update({
             where: {
-                userId: parseInt(userId),
                 photoId: parseInt(photoId),
             },
             data: {
-                isDelete: !photo.isDelete,
+                isDelete: !photo.isDelete, 
                 isFavorite: false,
                 deletedAt: photo.isDelete === false ? new Date() : null,
-            }
+            },
         });
 
-        if (photo.isDelete === true) {
-            return res.status(200).send({ message: "Successfully restored", data });
-        } else {
-            return res.status(200).send({ message: "Successfully deleted and albums disconnected", data });
-        }
+        const message = updatedPhoto.isDelete
+            ? "Photo successfully moved to trash"
+            : "Photo successfully restored";
+
+        return res.status(200).send({ message, data: updatedPhoto });
     } catch (error) {
         console.log(error);
-        res.status(500).send({ message: "Failed to update photo" });
+        return res.status(500).send({ message: "Failed to trash photo" });
     }
-}
+};
+
+
 
 const favoritePhoto = async (req, res) => {
     try {
