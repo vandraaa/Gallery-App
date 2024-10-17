@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_app/alert/alert.dart';
 import 'package:gallery_app/constant/constant.dart';
+import 'package:gallery_app/screen/home/home_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -74,6 +75,12 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
         var responseBody = await http.Response.fromStream(response);
         var jsonResponse = json.decode(responseBody.body);
         showAlert(context, jsonResponse['message'], true);
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const HomeScreen(initialIndex: 0)),
+        );
 
         setState(() {
           _selectedImage = null;

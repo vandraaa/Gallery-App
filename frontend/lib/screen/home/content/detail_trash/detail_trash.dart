@@ -10,7 +10,7 @@ import 'package:photo_view/photo_view.dart';
 
 class TrashDetailScreen extends StatefulWidget {
   final String photoUrl;
-  final String description;
+  final String? description;
   final String createdAt;
   final int userId;
   final int id;
@@ -162,13 +162,23 @@ class _TrashDetailScreenState extends State<TrashDetailScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            if (widget.description.isNotEmpty)
+            if (widget.description != null)
               Text(
                 "Photo Description: ${widget.description}",
                 style: const TextStyle(
                   fontSize: 15.5,
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w600,
+                ),
+              )
+            else
+              const Text(
+                "No description available",
+                style: TextStyle(
+                  fontSize: 14.5,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey,
                 ),
               ),
             Text(
