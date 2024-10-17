@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const { upload } = require("../config/multer");
-const deletePhotoInTrash = require("../controllers/photoController").deletePhotoInTrash;
 
 const photo = require("../controllers/photoController");
 
@@ -13,6 +12,5 @@ router.get('/trash', photo.getTrashPhoto);
 router.patch('/trash', photo.trash);
 router.delete('/delete', photo.deletePhoto);
 router.post('/upload', upload.single('image'), photo.createPhoto);
-router.get('/delete-photo', deletePhotoInTrash);
 
 module.exports = router
