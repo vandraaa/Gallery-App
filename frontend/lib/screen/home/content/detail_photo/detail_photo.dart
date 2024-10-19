@@ -40,6 +40,7 @@ class PhotoDetailScreen extends StatefulWidget {
 
 class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
   late bool _isFavorite;
+  bool _loadingFecthingAlbum = false;
 
   @override
   void initState() {
@@ -145,6 +146,10 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
     } catch (e) {
       showAlert(context, e.toString(), false);
       return [];
+    } finally {
+      setState(() {
+        _loadingFecthingAlbum = false;
+      });
     }
   }
 
@@ -377,53 +382,58 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                                   fontSize: 16,
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w500)),
-                          content: Container(
-                            width: double.maxFinite,
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: albums.length,
-                              itemBuilder: (context, index) {
-                                final album = albums[index];
-                                final photo = album['photos'].isNotEmpty
-                                    ? album['photos'][0]
-                                    : null;
-                                final totalPhotos = album['_count']['photos'];
+                          content: _loadingFecthingAlbum
+                              ? const Center(
+                                  child: CircularProgressIndicator(),
+                                )
+                              : Container(
+                                  width: double.maxFinite,
+                                  child: ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: albums.length,
+                                    itemBuilder: (context, index) {
+                                      final album = albums[index];
+                                      final photo = album['photos'].isNotEmpty
+                                          ? album['photos'][0]
+                                          : null;
+                                      final totalPhotos =
+                                          album['_count']['photos'];
 
-                                return ListTile(
-                                  contentPadding:
-                                      EdgeInsets.symmetric(vertical: 2),
-                                  leading: photo != null
-                                      ? Image.network(
-                                          photo['url'],
-                                          width: 50,
-                                          height: 50,
-                                          fit: BoxFit.cover,
-                                        )
-                                      : Icon(Icons.photo_album, size: 50),
-                                  title: Text(
-                                    album['title'],
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                      return ListTile(
+                                        contentPadding:
+                                            EdgeInsets.symmetric(vertical: 2),
+                                        leading: photo != null
+                                            ? Image.network(
+                                                photo['url'],
+                                                width: 50,
+                                                height: 50,
+                                                fit: BoxFit.cover,
+                                              )
+                                            : Icon(Icons.photo_album, size: 50),
+                                        title: Text(
+                                          album['title'],
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          'Total Photos: $totalPhotos',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          _addToAlbum(album['albumId']);
+                                          Navigator.pop(context);
+                                        },
+                                      );
+                                    },
                                   ),
-                                  subtitle: Text(
-                                    'Total Photos: $totalPhotos',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  onTap: () {
-                                    _addToAlbum(album['albumId']);
-                                    Navigator.pop(context);
-                                  },
-                                );
-                              },
-                            ),
-                          ),
+                                ),
                         );
                       },
                     );
@@ -456,7 +466,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                 ),
                 elevation: 0,
               ),
-            ),
+            )
           ],
         ),
       ),

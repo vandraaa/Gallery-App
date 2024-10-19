@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_app/alert/alert.dart';
 import 'package:gallery_app/constant/constant.dart';
-import 'package:gallery_app/screen/home/home_screen.dart';
+import 'package:gallery_app/screen/home/content/detail_photo/detail_photo.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -76,10 +76,29 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
         var jsonResponse = json.decode(responseBody.body);
         showAlert(context, jsonResponse['message'], true);
 
+        var photoUrl = jsonResponse['data']['url'];
+        var description = jsonResponse['data']['description'];
+        var createdAt = jsonResponse['data']['createdAt'];
+        var userId = jsonResponse['data']['userId'];
+        var id = jsonResponse['data']['photoId'];
+        var isFavorite = jsonResponse['data']['isFavorite'];
+        var filename = jsonResponse['data']['filename'];
+        var size = jsonResponse['data']['size'];
+        var albumId = jsonResponse['data']['albumId'];
+
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => const HomeScreen(initialIndex: 0)),
+              builder: (context) => PhotoDetailScreen(
+                  photoUrl: photoUrl,
+                  description: description,
+                  createdAt: createdAt,
+                  userId: userId,
+                  id: id,
+                  isFavorite: isFavorite,
+                  filename: filename,
+                  size: size,
+                  albumId: albumId)),
         );
 
         setState(() {

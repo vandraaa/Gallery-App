@@ -100,8 +100,7 @@ class _HomeContentState extends State<HomeContent> {
         dateTime.month == now.month &&
         dateTime.day == now.day - 1) {
       return 'Yesterday';
-    } else if (dateTime.isBefore(now.subtract(const Duration(days: 7))) &&
-        dateTime.isAfter(now.subtract(const Duration(days: 14)))) {
+    } else if (dateTime.isAfter(now.subtract(const Duration(days: 7)))) {
       return 'Last 7 days';
     } else {
       return DateFormat('dd MMMM yyyy').format(dateTime);
