@@ -103,6 +103,29 @@ const getAlbumsByUserId = async (req, res) => {
   }
 };
 
+const getPhotoNotExist = async (req, res) => {
+  const albumId = req.params.id;
+  const userId = req.query.userId;
+
+  try {
+    const photos = await prisma.photo.findMany({
+      where: {
+        userId: parseInt(userId),
+        album: {
+          none: {
+            albumId: parseInt(albumId),
+          },
+        },
+      },
+    });
+
+    res.status(200).send({ message: "Get photo successfully", data: photos });
+  } catch (e) {
+    console.log(e);
+    res.status(500).send({ message: "Failed to get photo" });
+  }
+}
+
 const getPhotoFromAlbumId = async (req, res) => {
   try {
     const albumId = req.params.id;
@@ -210,6 +233,7 @@ module.exports = {
   createAlbum,
   addPhotoToAlbum,
   getAlbumsByUserId,
+  getPhotoNotExist,
   getPhotoFromAlbumId,
   removeFromAlbum,
   deleteAlbum,

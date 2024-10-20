@@ -31,7 +31,6 @@ model Photo {
   url         String
   description String?
   createdAt   DateTime @default(now())
-  albumId     Int?
   isDelete    Boolean  @default(false)
   deletedAt   DateTime?
   isFavorite  Boolean  @default(false)

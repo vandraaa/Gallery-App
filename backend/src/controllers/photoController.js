@@ -304,9 +304,7 @@ const trash = async (req, res) => {
         console.log(error);
         return res.status(500).send({ message: "Failed to trash photo" });
     }
-};
-
-
+}
 
 const favoritePhoto = async (req, res) => {
     try {
