@@ -246,7 +246,15 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    confirmPopupCenter(context, 'Add Photos', 'Are you sure you want to add these photos to this album?', 'Add Photos', () {});
+                    confirmPopupCenter(
+                        context,
+                        'Add Photos',
+                        'Are you sure you want to add these photos to this album?',
+                        'Add Photos',
+                        () {
+                          _addPhotoToAlbum();
+                        }
+                    );
                   },
                   child: const Text(
                     'Add Photos',
@@ -261,19 +269,39 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
     );
   }
 
-  // Future<void> _addPhotoToAlbum() async {
-  //   if (_selectedPhotoIds.isEmpty) {
-  //     showAlert(context, 'Please select at least one photo', false);
-  //     return;
-  //   }
+  Future<void> _addPhotoToAlbum() async {
+    if (_selectedPhotoIds.isEmpty) {
+      showAlert(context, 'Please select at least one photo', false);
+      return;
+    }
 
-  //   try {
-  //     final response = await http.post
-  //   } catch (e) {
-  //     print(e);
-  //     showAlert(context, 'Failed to add photos to album', false);
-  //   }
-  // }
+    try {
+      final body = json.encode({'albumId': widget.albumId, 'photoIds': _selectedPhotoIds});
+      final headers = {
+        'Content-type': 'application/json'
+      };
+
+      final response =
+          await http.post(Uri.parse('$baseUrl/album/add-multiple'), body: body, headers: headers);
+
+      if (response.statusCode == 200) {
+        _fetchAlbum();
+        final responseData = json.decode(response.body);
+        final message = responseData['message'];
+        showAlert(context, message, true);
+        setState(() {
+          _selectedPhotoIds = [];
+        });
+      } else {
+        final responseData = json.decode(response.body);
+        final message = responseData['message'];
+        showAlert(context, message, false);
+      }
+    } catch (e) {
+      print(e);
+      showAlert(context, 'Failed to add photos to album', false);
+    }
+  }
 
   Future<void> _deleteAlbum() async {
     setState(() {
