@@ -69,7 +69,7 @@ const uploadImageToFirebase = async (file) => {
 
 const createPhoto = async (req, res) => {
     try {
-        const { userId, description, albumId } = req.body;
+        const { userId, description } = req.body;
         const file = req.file;
 
         if (!file) {
@@ -96,7 +96,6 @@ const createPhoto = async (req, res) => {
                 size: formatSizeFile(sizeInBytes),
                 url: imageUrl,
                 description: description ? description : null,
-                albumId: albumId ? parseInt(albumId) : null
             }
         })
 
@@ -265,9 +264,7 @@ const trash = async (req, res) => {
             return res.status(404).send({ message: "Photo not found or does not belong to the user" });
         }
 
-        // Jika photo belum dihapus dan memiliki album, lakukan disconnect dari album
         if (!photo.isDelete && photo.album.length > 0) {
-            // Loop untuk disconnect setiap album yang terkait
             for (const album of photo.album) {
                 await prisma.album.update({
                     where: {
