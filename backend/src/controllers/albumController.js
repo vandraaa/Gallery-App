@@ -67,6 +67,47 @@ const addPhotoToAlbum = async (req, res) => {
   }
 };
 
+const addMultiplePhotosToAlbum = async (req, res) => {
+  try {
+    const { albumId, photoIds } = req.body; 
+
+    const existingPhotos = await prisma.album.findFirst({
+      where: {
+        albumId: parseInt(albumId),
+        photos: {
+          some: {
+            photoId: {
+              in: photoIds.map((id) => parseInt(id)),
+            },
+          },
+        },
+      },
+    });
+
+    if (existingPhotos) {
+      return res.status(400).send({ message: "Some photos are already added to the album" });
+    }
+
+    const updatedAlbum = await prisma.album.update({
+      where: {
+        albumId: parseInt(albumId),
+      },
+      data: {
+        photos: {
+          connect: photoIds.map((id) => ({ photoId: parseInt(id) })),
+        },
+      },
+    });
+
+    res
+      .status(200)
+      .send({ message: "Photos added to album successfully", data: updatedAlbum });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Failed to add photos to album" });
+  }
+};
+
 const getAlbumsByUserId = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -232,6 +273,7 @@ const updateAlbum = async (req, res) => {
 module.exports = {
   createAlbum,
   addPhotoToAlbum,
+  addMultiplePhotosToAlbum,
   getAlbumsByUserId,
   getPhotoNotExist,
   getPhotoFromAlbumId,
