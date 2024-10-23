@@ -115,13 +115,14 @@ class _AlbumContentState extends State<AlbumContent> {
 
                       return GestureDetector(
                         onTap: () async {
-                          await Navigator.push(
+                          final result = await Navigator.push(
                             context,
                             PageRouteBuilder(
                               pageBuilder:
                                   (context, animation, secondaryAnimation) =>
                                       DetailAlbumScreen(
                                 albumId: album['albumId'].toString(),
+                                userId: widget.userId,
                               ),
                               transitionsBuilder: (context, animation,
                                   secondaryAnimation, child) {
@@ -131,6 +132,13 @@ class _AlbumContentState extends State<AlbumContent> {
                               reverseTransitionDuration: Duration.zero,
                             ),
                           );
+
+                          if (result == true) {
+                            setState(() {
+                              _isLoading = true;
+                            });
+                            _getAlbum();
+                          }
                         },
                         child: Card(
                           elevation: 4,
@@ -196,7 +204,7 @@ class _AlbumContentState extends State<AlbumContent> {
                     builder: (context) => AddAlbumScreen(
                       userId: widget.userId,
                     ),
-                  ),
+                  )
                 );
 
                 if (result == true) {

@@ -120,7 +120,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
             context,
             MaterialPageRoute(
               builder: (context) =>
-                  DetailAlbumScreen(albumId: widget.albumId.toString()),
+                  DetailAlbumScreen(albumId: widget.albumId.toString(), userId: widget.userId),
             ));
         showAlert(context, responseData, true);
       } else {
@@ -390,6 +390,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                                   width: double.maxFinite,
                                   child: ListView.builder(
                                     shrinkWrap: true,
+                                    physics: const BouncingScrollPhysics(),
                                     itemCount: albums.length,
                                     itemBuilder: (context, index) {
                                       final album = albums[index];

@@ -11,8 +11,11 @@ import 'package:flutter/rendering.dart';
 
 class DetailAlbumScreen extends StatefulWidget {
   final String albumId;
+  final int userId;
 
-  const DetailAlbumScreen({Key? key, required this.albumId}) : super(key: key);
+  const DetailAlbumScreen(
+      {Key? key, required this.albumId, required this.userId})
+      : super(key: key);
 
   @override
   State<DetailAlbumScreen> createState() => _DetailAlbumScreenState();
@@ -26,6 +29,8 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
 
   bool _isFabVisible = true;
   bool _isLoadingDelete = false;
+
+  List<int> _selectedPhotoIds = [];
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -106,6 +111,170 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
     }
   }
 
+  Future<void> _fetchPhotosAndShowDialog() async {
+    try {
+      final response = await http.get(Uri.parse(
+          '$baseUrl/album/photos/${widget.albumId}?userId=${widget.userId}'));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> addPhotoAlbum = json.decode(response.body)['data'];
+
+        _showPhotosDialog(addPhotoAlbum);
+      } else {
+        showAlert(context, "Failed to fetch photos", false);
+      }
+    } catch (e) {
+      showAlert(context, "Error fetching photos: $e", false);
+    }
+  }
+
+  void _toggleSelectPhoto(int photoId) {
+    setState(() {
+      if (_selectedPhotoIds.contains(photoId)) {
+        _selectedPhotoIds.remove(photoId);
+      } else {
+        _selectedPhotoIds.add(photoId);
+      }
+    });
+  }
+
+  void _showPhotosDialog(List<dynamic> photos) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text(
+                'Photos',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  photos.isEmpty
+                      ? const Text('No photos found.')
+                      : SizedBox(
+                          height: 300,
+                          width: double.maxFinite,
+                          child: GridView.builder(
+                            shrinkWrap: true,
+                            physics: const BouncingScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 10.0,
+                              mainAxisSpacing: 10.0,
+                              childAspectRatio: 1.0,
+                            ),
+                            itemCount: photos.length,
+                            itemBuilder: (context, index) {
+                              final photo = photos[index];
+                              final int photoId = photo['photoId'];
+
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _toggleSelectPhoto(photoId);
+                                  });
+                                },
+                                child: Stack(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        border: Border.all(
+                                          color: _selectedPhotoIds
+                                                  .contains(photoId)
+                                              ? Colors.blueAccent
+                                              : Colors.transparent,
+                                          width: 2.0,
+                                        ),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        child: Image.network(
+                                          photo['url'],
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    if (_selectedPhotoIds.contains(photoId))
+                                      Positioned(
+                                        bottom: 8.0,
+                                        right: 8.0,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.blueAccent,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.check,
+                                            color: Colors.white,
+                                            size: 14.0,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    setState(() {
+                      _selectedPhotoIds = [];
+                    });
+                  },
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(fontFamily: 'Poppins'),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    confirmPopupCenter(context, 'Add Photos', 'Are you sure you want to add these photos to this album?', 'Add Photos', () {});
+                  },
+                  child: const Text(
+                    'Add Photos',
+                    style: TextStyle(fontFamily: 'Poppins'),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Future<void> _addPhotoToAlbum() async {
+  //   if (_selectedPhotoIds.isEmpty) {
+  //     showAlert(context, 'Please select at least one photo', false);
+  //     return;
+  //   }
+
+  //   try {
+  //     final response = await http.post
+  //   } catch (e) {
+  //     print(e);
+  //     showAlert(context, 'Failed to add photos to album', false);
+  //   }
+  // }
+
   Future<void> _deleteAlbum() async {
     setState(() {
       _isLoadingDelete = true;
@@ -121,8 +290,7 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  HomeScreen(initialIndex: 1),
+              builder: (context) => HomeScreen(initialIndex: 1),
             ));
         showAlert(context, message, true);
       } else {
@@ -477,7 +645,9 @@ class _DetailAlbumScreenState extends State<DetailAlbumScreen> {
       floatingActionButton: _isFabVisible
           ? FloatingActionButton(
               backgroundColor: const Color(0xFF2196F3),
-              onPressed: () {},
+              onPressed: () async {
+                _fetchPhotosAndShowDialog();
+              },
               shape: const CircleBorder(),
               child: const Icon(
                 Icons.add,

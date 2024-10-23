@@ -50,7 +50,7 @@ class _AddAlbumContent extends State<AddAlbumScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => DetailAlbumScreen(albumId: responseData['data']['albumId'].toString())),
+              builder: (context) => DetailAlbumScreen(albumId: responseData['data']['albumId'].toString(), userId: widget.userId)),
         );
       } else {
         final responseData = json.decode(response.body);
@@ -134,6 +134,7 @@ class _AddAlbumContent extends State<AddAlbumScreen> {
                           width: double.maxFinite,
                           child: GridView.builder(
                             shrinkWrap: true,
+                            physics: const BouncingScrollPhysics(),
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 3,
