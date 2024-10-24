@@ -7,7 +7,7 @@ const cronJob = require('./controllers/photoController').cron;
 const app = express();
 
 app.get("/", (req, res) => {
-  res.send("Api Gallery");
+  res.send("Hello World!");
 });
 
 app.use((err, req, res, next) => {
@@ -26,10 +26,12 @@ app.use(bodyParser.json());
 const userRoutes = require("./routes/user");
 const photoRoutes = require("./routes/photo");
 const albumRoutes = require("./routes/album");
+const cronJobRoutes = require("./routes/cronJob");
 
 app.use('/users', userRoutes);
 app.use('/photos', photoRoutes);
 app.use('/album', albumRoutes);
+app.use('/cron-job', cronJobRoutes);
 
 const server = app.listen(PORT, () => {
   console.log(`Server running on port http://localhost:${PORT}`);
