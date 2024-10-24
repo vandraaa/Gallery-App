@@ -2,7 +2,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const PORT = require("./config/server") || 4321;
 const cors = require('cors');
-const cronJob = require('./controllers/photoController').cron;
 
 const app = express();
 
