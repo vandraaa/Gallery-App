@@ -1,6 +1,6 @@
 const prisma = require("../config/database");
 const multer = require('multer');
-const { admin, storage } = require('../config/firebase');
+const { admin, storageBucket } = require('../config/firebase');
 
 const uploadImageToFirebase = async (file) => {
     try {

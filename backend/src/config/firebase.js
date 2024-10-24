@@ -1,9 +1,7 @@
-// firebaseConfig.js
 const admin = require('firebase-admin');
 const serviceAccount = require('../../serviceAccountKey.json');
 const { initializeApp } = require("firebase/app");
-const { getStorage } = require("firebase/storage"); // Ubah dari firebase/analytics ke firebase/storage untuk storage
-// Pastikan Anda telah menginstal firebase-admin dan firebase SDK menggunakan npm
+const { getStorage } = require("firebase/storage");
 
 // Konfigurasi Firebase Admin SDK
 const storageBucket = process.env.FIREBASE_STORAGE_BUCKET;
@@ -28,7 +26,6 @@ const firebaseConfig = {
 
 // Inisialisasi Firebase
 const app = initializeApp(firebaseConfig);
-const storage = getStorage(app); // Gunakan getStorage dari firebase/storage
+const storage = getStorage(app); 
 
-// Ekspor admin dan storage untuk digunakan di file lain
-module.exports = { admin, storage };
+module.exports = { admin, storageBucket, storage };

@@ -1,9 +1,7 @@
 const prisma = require("../config/database");
 const { admin, storage } = require("../config/firebase");
-const cron = require("node-cron");
 
 const cronJob = async () => {
-  cron.schedule("5 * * * *", async () => {
     const now = new Date();
     const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
     console.log("Cron job started at", now);
@@ -38,7 +36,6 @@ const cronJob = async () => {
     } catch (e) {
       console.error("Error in cron job:", e);
     }
-  });
 };
 
 module.exports = {
