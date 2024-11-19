@@ -26,6 +26,16 @@ const createPhoto = async (req, res) => {
         const { userId, description } = req.body;
         const file = req.file;
 
+        const photoLimitUser = await prisma.photo.findMany({
+            where: {
+                userId: parseInt(userId),                
+            },
+        })
+
+        if (photoLimitUser.length >= 6) {
+            return res.status(400).send({ message: "You can only upload 10 photos per account" });
+        }
+
         if (!file) {
             return res.status(400).send({ message: "File is required" });
         }

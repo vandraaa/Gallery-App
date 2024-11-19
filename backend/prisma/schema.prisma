@@ -18,6 +18,7 @@ model User {
   name      String
   email     String   @unique
   password  String
+  verified  Boolean @default(false)
   createdAt DateTime @default(now())
   photos    Photo[]
   albums    Album[]

@@ -21,6 +21,12 @@ const login = async (req, res) => {
       },
     });
 
+    const verifiedUser = user.verified.valueOf(true);
+
+    if (!verifiedUser) {
+      return res.status(400).send({ message: "Account not verified!" });
+    }
+
     if (!user) {
       return res.status(400).send({ message: "User not found" });
     }
