@@ -32,7 +32,7 @@ const createPhoto = async (req, res) => {
             },
         })
 
-        if (photoLimitUser.length >= 6) {
+        if (photoLimitUser.length >= 10) {
             return res.status(400).send({ message: "You can only upload 10 photos per account" });
         }
 
