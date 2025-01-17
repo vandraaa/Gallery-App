@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gallery_app/screen/auth/auth_screen.dart';
 import 'package:gallery_app/screen/home/home_screen.dart';
 import 'package:lottie/lottie.dart';
-import 'package:gallery_app/screen/auth/service/auth_service.dart';
+import 'package:gallery_app/service/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

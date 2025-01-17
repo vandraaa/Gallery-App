@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:gallery_app/components/grouped_photos.dart';
 import 'package:gallery_app/screen/home/content/add_photo/new_photo.dart';
-import 'package:gallery_app/screen/home/content/detail_photo/detail_photo.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:gallery_app/constant/constant.dart';
-import 'package:intl/intl.dart';
+import 'package:gallery_app/service/photo_service.dart';
 
 class HomeContent extends StatefulWidget {
   final int userId;
@@ -26,7 +23,7 @@ class _HomeContentState extends State<HomeContent> {
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
-    _fetchPhotos();
+    getPhoto();
   }
 
   @override
@@ -37,15 +34,13 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   void _scrollListener() {
-    if (_scrollController.position.userScrollDirection ==
-        ScrollDirection.reverse) {
+    if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
       if (_isFabVisible) {
         setState(() {
           _isFabVisible = false;
         });
       }
-    } else if (_scrollController.position.userScrollDirection ==
-        ScrollDirection.forward) {
+    } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
       if (!_isFabVisible) {
         setState(() {
           _isFabVisible = true;
@@ -54,56 +49,23 @@ class _HomeContentState extends State<HomeContent> {
     }
   }
 
-  Future<void> _fetchPhotos() async {
-    _groupedPhotos.clear();
-
-    final response = await http
-        .get(Uri.parse('$baseUrl/photos?id=${widget.userId}'));
+  Future<void> getPhoto() async {
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
-      if (response.statusCode == 200) {
-        final decodedJson = json.decode(response.body);
-        _groupPhotos(decodedJson['data']);
-        setState(() {
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _isLoading = false;
-          _isHavePhoto = false;
-        });
-      }
-    } catch (error) {
-      print(error);
-    }
-  }
-
-  void _groupPhotos(List<dynamic> photos) {
-    for (var photo in photos) {
-      String formattedDate = _formatDate(photo['createdAt']);
-      if (_groupedPhotos[formattedDate] == null) {
-        _groupedPhotos[formattedDate] = [];
-      }
-      _groupedPhotos[formattedDate]!.add(photo);
-    }
-  }
-
-  String _formatDate(String createdAt) {
-    DateTime dateTime = DateTime.parse(createdAt);
-    DateTime now = DateTime.now();
-
-    if (dateTime.year == now.year &&
-        dateTime.month == now.month &&
-        dateTime.day == now.day) {
-      return 'Today';
-    } else if (dateTime.year == now.year &&
-        dateTime.month == now.month &&
-        dateTime.day == now.day - 1) {
-      return 'Yesterday';
-    } else if (dateTime.isAfter(now.subtract(const Duration(days: 7)))) {
-      return 'Last 7 days';
-    } else {
-      return DateFormat('dd MMMM yyyy').format(dateTime);
+      final groupedPhotos = await getPhotos(widget.userId);
+      setState(() {
+        _groupedPhotos.clear();
+        _groupedPhotos.addAll(groupedPhotos);
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _isHavePhoto = false;
+      });
     }
   }
 
@@ -125,9 +87,17 @@ class _HomeContentState extends State<HomeContent> {
                       ),
                     ),
                   )
-                : ListView(
-                    controller: _scrollController,
-                    children: _buildGroupedPhotos(),
+                : RefreshIndicator(
+                    onRefresh: getPhoto,
+                    child: ListView(
+                      controller: _scrollController,
+                      children: [
+                        GroupedPhotosWidget(
+                          groupedPhotos: _groupedPhotos,
+                          fetchPhotos: getPhoto,
+                        ),
+                      ],
+                    ),
                   ),
       ),
       floatingActionButton: _isFabVisible
@@ -141,8 +111,7 @@ class _HomeContentState extends State<HomeContent> {
                         AddPhotoScreen(
                       userId: widget.userId,
                     ),
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
                       return child;
                     },
                   ),
@@ -152,7 +121,7 @@ class _HomeContentState extends State<HomeContent> {
                   setState(() {
                     _isLoading = true;
                   });
-                  await _fetchPhotos(); 
+                  await getPhoto();
                 }
               },
               shape: const CircleBorder(),
@@ -164,94 +133,5 @@ class _HomeContentState extends State<HomeContent> {
             )
           : null,
     );
-  }
-
-  List<Widget> _buildGroupedPhotos() {
-    List<Widget> photoWidgets = [];
-    for (var date in _groupedPhotos.keys) {
-      photoWidgets.add(
-        const SizedBox(height: 16),
-      );
-
-      photoWidgets.add(
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            date,
-            style: const TextStyle(
-              fontSize: 16,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      );
-
-      var photos = _groupedPhotos[date]!;
-      photoWidgets.add(
-        GridView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 1,
-              crossAxisSpacing: 8.0,
-              mainAxisSpacing: 8.0,
-            ),
-            itemCount: photos.length,
-            itemBuilder: (context, index) {
-              var photo = photos[index];
-              return GestureDetector(
-                onTap: () async {
-                  await Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                          PhotoDetailScreen(
-                        photoUrl: photo['url'],
-                        description: photo['description'],
-                        createdAt: photo['createdAt'],
-                        userId: photo['userId'],
-                        id: photo['photoId'],
-                        isFavorite: photo['isFavorite'],
-                        filename: photo['filename'],
-                        size: photo['size'],
-                        albumId: null,
-                      ),
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        return child;
-                      },
-                    ),
-                  );
-
-                  setState(() {
-                    _isLoading = true;
-                  });
-                  await _fetchPhotos();
-                },
-                child: Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        image: DecorationImage(
-                          image: NetworkImage(photo['url']),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-      );
-    }
-    return photoWidgets;
   }
 }

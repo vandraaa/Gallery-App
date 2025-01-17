@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:gallery_app/alert/alert.dart';
-import 'package:gallery_app/alert/confirmPopupCenter.dart';
+import 'package:gallery_app/components/alert.dart';
+import 'package:gallery_app/components/confirm_popup_center.dart';
 import 'package:gallery_app/constant/constant.dart';
 import 'package:gallery_app/screen/home/content/detail_album/detail_album_screen.dart';
 import 'package:gallery_app/screen/home/home_screen.dart';
-import 'package:gallery_app/screen/home/service/download_photo.dart';
+import 'package:gallery_app/service/photo_service.dart';
+// import 'package:gallery_app/screen/home/service/download_photo.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';

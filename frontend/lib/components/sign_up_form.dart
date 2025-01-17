@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gallery_app/alert/alert.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:gallery_app/constant/constant.dart';
+import 'package:gallery_app/service/auth_service.dart';
 
 class SignUpForm extends StatefulWidget {
   final VoidCallback onSignUpSucess;
@@ -32,39 +29,12 @@ class _SignUpFormState extends State<SignUpForm> {
     setState(() {
       _isLoading = true;
     });
-    final url = Uri.parse('$baseUrl/users');
-    final headers = {
-      "Access-Control-Allow-Origin": "*",
-      'Content-Type': 'application/json',
-      'Accept': '*/*',
-    };
-    final body =
-        json.encode({"name": name, "email": email, "password": password});
 
-    try {
-      final response = await http.post(url, headers: headers, body: body);
-      final responseData = json.decode(response.body)['message'];
+    await signUpUser(context, name, email, password);
 
-      if (response.statusCode == 201) {
-        showAlert(context, responseData, true);
-        setState(() {
-          _nameController.clear();
-          _emailController.clear();
-          _passwordController.clear();
-        });
-
-        widget.onSignUpSucess();
-      } else {
-        showAlert(context, responseData, false);
-      }
-    } catch (e) {
-      print('Error: ${e.toString()}');
-      showAlert(context, e.toString(), false);
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override

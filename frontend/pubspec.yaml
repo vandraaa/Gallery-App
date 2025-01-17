@@ -42,7 +42,9 @@ dependencies:
   shared_preferences: ^2.1.1
   photo_view: ^0.15.0
   image_picker: ^0.8.7+5
-  flutter_file_downloader: ^2.0.0
+  shimmer: ^3.0.0
+  cached_network_image: ^3.3.1
+  # flutter_file_downloader: ^2.0.0
 
 dev_dependencies:
   flutter_test:

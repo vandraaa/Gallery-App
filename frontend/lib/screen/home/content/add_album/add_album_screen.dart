@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gallery_app/alert/alert.dart';
+import 'package:gallery_app/components/alert.dart';
 import 'package:gallery_app/constant/constant.dart';
 import 'package:gallery_app/screen/home/content/detail_album/detail_album_screen.dart';
 import 'package:http/http.dart' as http;

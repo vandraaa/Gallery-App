@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gallery_app/alert/alert.dart';
-import 'package:gallery_app/alert/confirmPopupCenter.dart';
+import 'package:gallery_app/components/alert.dart';
+import 'package:gallery_app/components/confirm_popup_center.dart';
 import 'package:gallery_app/constant/constant.dart';
 import 'package:gallery_app/screen/home/content/detail_photo/detail_photo.dart';
 import 'package:gallery_app/screen/home/home_screen.dart';
