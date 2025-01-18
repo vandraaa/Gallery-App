@@ -18,3 +18,13 @@ String formatDate(String createdAt) {
     return DateFormat('dd MMMM yyyy').format(dateTime);
   }
 }
+
+String formatDate2(String createdAt) {
+  DateTime parsedDate = DateTime.parse(createdAt);
+  return DateFormat('EEEE, dd MMMM yyyy').format(parsedDate);
+}
+
+String formatTime(String createdAt) {
+  DateTime parsedDate = DateTime.parse(createdAt);
+  return DateFormat('HH:mm').format(parsedDate);
+}

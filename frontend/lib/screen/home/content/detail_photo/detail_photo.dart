@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_app/components/alert.dart';
 import 'package:gallery_app/components/confirm_popup_center.dart';
-import 'package:gallery_app/constant/constant.dart';
+import 'package:gallery_app/components/detail_photo_view.dart';
+import 'package:gallery_app/constant/utils.dart';
 import 'package:gallery_app/screen/home/content/detail_album/detail_album_screen.dart';
 import 'package:gallery_app/screen/home/home_screen.dart';
 import 'package:gallery_app/service/photo_service.dart';
 // import 'package:gallery_app/screen/home/service/download_photo.dart';
-import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:photo_view/photo_view.dart';
 
 class PhotoDetailScreen extends StatefulWidget {
   final String photoUrl;
@@ -52,98 +49,69 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
 
   Future<void> _fetchFavoriteStatus() async {
     try {
-      final response = await http.get(Uri.parse(
-          '$baseUrl/photos/detail?id=${widget.id}&userId=${widget.userId}'));
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        setState(() {
-          _isFavorite = responseData['data']['isFavorite'];
-        });
-      } else {
-        showAlert(context, 'Failed to load favorite status', false);
-      }
+      final bool isFavorite =
+          await fetchFavoriteStatus(widget.id, widget.userId);
+      setState(() {
+        _isFavorite = isFavorite;
+      });
+    } catch (e) {
+      showAlert(
+          context, 'Failed to load favorite status: ${e.toString()}', false);
+    }
+  }
+
+  Future<void> _handleToggleFavorite() async {
+    try {
+      final message = await toggleFavorite(widget.id, widget.userId);
+      setState(() {
+        _isFavorite = !_isFavorite;
+      });
+      showAlert(context, message, true);
     } catch (e) {
       showAlert(context, e.toString(), false);
     }
   }
 
-  Future<void> _toggleFavorite() async {
-    final response = await http.patch(Uri.parse(
-        '$baseUrl/photos/favorite?id=${widget.id}&userId=${widget.userId}'));
-    final responseData = json.decode(response.body)['message'];
-    print(responseData);
-
+  Future<void> _handleAddToTrash() async {
     try {
-      if (response.statusCode == 200) {
-        setState(() {
-          _isFavorite = !_isFavorite;
-        });
-
-        showAlert(context, responseData, true);
-      } else {
-        showAlert(context, responseData, false);
-      }
-    } catch (e) {
-      showAlert(context, e.toString(), false);
-    } finally {
-      _fetchFavoriteStatus();
-    }
-  }
-
-  Future<void> _addToTrash() async {
-    final response = await http.patch(Uri.parse(
-        '$baseUrl/photos/trash?id=${widget.id}&userId=${widget.userId}'));
-    final responseData = json.decode(response.body)['message'];
-    try {
-      if (response.statusCode == 200) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const HomeScreen(initialIndex: 0)),
-        );
-        showAlert(context, responseData, true);
-      } else {
-        showAlert(context, responseData, false);
-      }
+      final message = await addToTrash(widget.id, widget.userId);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomeScreen(initialIndex: 0),
+        ),
+      );
+      showAlert(context, message, true);
     } catch (e) {
       showAlert(context, e.toString(), false);
     }
   }
 
-  Future<void> _removePhotoFromAlbum() async {
-    final response = await http.delete(Uri.parse(
-      '${baseUrl}/album/remove?id=${widget.albumId}&photoId=${widget.id}',
-    ));
-    final responseData = json.decode(response.body)['message'];
+  Future<void> _handleRemovePhotoFromAlbum() async {
     try {
-      if (response.statusCode == 200) {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  DetailAlbumScreen(albumId: widget.albumId.toString(), userId: widget.userId),
-            ));
-        showAlert(context, responseData, true);
-      } else {
-        showAlert(context, responseData, false);
-      }
+      final message = await removePhotoFromAlbum(widget.albumId!, widget.id);
+      showAlert(context, message, true);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DetailAlbumScreen(
+            albumId: widget.albumId.toString(),
+            userId: widget.userId,
+          ),
+        ),
+      );
     } catch (e) {
-      print(e);
       showAlert(context, e.toString(), false);
     }
   }
 
   Future<List<Map<String, dynamic>>> _fetchAlbums() async {
+    setState(() {
+      _loadingFecthingAlbum = true;
+    });
     try {
-      final response =
-          await http.get(Uri.parse('$baseUrl/album/${widget.userId}'));
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body)['data'] as List;
-        return responseData.cast<Map<String, dynamic>>();
-      } else {
-        showAlert(context, 'Failed to load albums', false);
-        return [];
-      }
+      final response = await fetchAlbums(widget.userId);
+      return response;
     } catch (e) {
       showAlert(context, e.toString(), false);
       return [];
@@ -155,38 +123,12 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
   }
 
   Future<void> _addToAlbum(int albumId) async {
-    final url = Uri.parse('${baseUrl}/album/add');
-    final body = json.encode({
-      "photoId": widget.id,
-      "albumId": albumId,
-    });
-    final headers = {
-      "Access-Control-Allow-Origin": "*",
-      'Content-Type': 'application/json',
-      'Accept': '*/*',
-    };
     try {
-      final response = await http.patch(url, headers: headers, body: body);
-      final responseData = json.decode(response.body)['message'];
-      if (response.statusCode == 200) {
-        showAlert(context, responseData, true);
-      } else {
-        showAlert(context, responseData, false);
-      }
+      final message = await addToAlbum(widget.id, albumId);
+      showAlert(context, message, true);
     } catch (e) {
-      print(e);
-      showAlert(context, 'Failed to add photo to album', false);
+      showAlert(context, e.toString(), false);
     }
-  }
-
-  String _formatDate(String createdAt) {
-    DateTime parsedDate = DateTime.parse(createdAt);
-    return DateFormat('EEEE, dd MMMM yyyy').format(parsedDate);
-  }
-
-  String _formatTime(String createdAt) {
-    DateTime parsedDate = DateTime.parse(createdAt);
-    return DateFormat('HH:mm').format(parsedDate);
   }
 
   @override
@@ -209,7 +151,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
               _isFavorite ? Icons.favorite : Icons.favorite_border,
               color: _isFavorite ? Colors.red : Colors.white,
             ),
-            onPressed: _toggleFavorite,
+            onPressed: _handleToggleFavorite,
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
@@ -219,8 +161,9 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                   context,
                   'Want to delete this photo?',
                   'Photos will be moved to the trash and will be deleted within 7 days.',
-                  'Delete Photo',
-                  _addToTrash);
+                  'Delete Photo', () {
+                _handleAddToTrash();
+              });
             },
           ),
         ],
@@ -236,7 +179,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        PhotoViewScreen(
+                        DetailPhotoView(
                       photoUrl: widget.photoUrl,
                     ),
                     transitionsBuilder:
@@ -282,7 +225,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                 ),
               ),
             Text(
-              '${_formatDate(widget.createdAt)} at ${_formatTime(widget.createdAt)}',
+              '${formatDate2(widget.createdAt)} at ${formatTime(widget.createdAt)}',
               style: const TextStyle(
                 fontSize: 14.5,
                 fontFamily: 'Poppins',
@@ -335,7 +278,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: _toggleFavorite,
+              onPressed: _handleToggleFavorite,
               icon: Icon(
                 _isFavorite ? Icons.favorite : Icons.favorite_border,
                 color: _isFavorite ? Colors.white : Colors.red,
@@ -369,7 +312,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                     'Remove from Album',
                     'Are you sure you want to remove this photo from the album?',
                     'Remove Photo',
-                    _removePhotoFromAlbum,
+                    _handleRemovePhotoFromAlbum,
                   );
                 } else {
                   List<Map<String, dynamic>> albums = await _fetchAlbums();
@@ -471,24 +414,6 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
             )
           ],
         ),
-      ),
-    );
-  }
-}
-
-class PhotoViewScreen extends StatelessWidget {
-  final String photoUrl;
-
-  const PhotoViewScreen({super.key, required this.photoUrl});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: PhotoView(
-        imageProvider: NetworkImage(photoUrl),
-        minScale: PhotoViewComputedScale.contained,
-        maxScale: PhotoViewComputedScale.covered * 2,
       ),
     );
   }
