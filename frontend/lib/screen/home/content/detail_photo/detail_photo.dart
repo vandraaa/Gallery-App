@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gallery_app/components/alert.dart';
 import 'package:gallery_app/components/confirm_popup_center.dart';
 import 'package:gallery_app/components/detail_photo_view.dart';
+import 'package:gallery_app/components/add_album_list.dart';
 import 'package:gallery_app/constant/utils.dart';
 import 'package:gallery_app/screen/home/content/detail_album/detail_album_screen.dart';
 import 'package:gallery_app/screen/home/home_screen.dart';
@@ -200,6 +201,66 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                     widget.photoUrl,
                     fit: BoxFit.cover,
                     width: double.infinity,
+                    loadingBuilder: (BuildContext context, Widget child,
+                        ImageChunkEvent? loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      } else {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 40,
+                                height: 40,
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          (loadingProgress.expectedTotalBytes ??
+                                              1)
+                                      : null,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
+                                "Loading image...",
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                    fontFamily: 'Poppins'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },
+                    errorBuilder: (BuildContext context, Object error,
+                        StackTrace? stackTrace) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.broken_image,
+                              size: 50,
+                              color: Colors.grey,
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              "Failed to load image",
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                  fontFamily: 'Poppins'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -238,8 +299,7 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start, // Aligns text to the left
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       "Filename: ${widget.filename}",
@@ -317,70 +377,11 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                 } else {
                   List<Map<String, dynamic>> albums = await _fetchAlbums();
                   if (albums.isNotEmpty) {
-                    showDialog(
+                    await showAddAlbumDialog(
                       context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text('Select Album',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500)),
-                          content: _loadingFecthingAlbum
-                              ? const Center(
-                                  child: CircularProgressIndicator(),
-                                )
-                              : Container(
-                                  width: double.maxFinite,
-                                  child: ListView.builder(
-                                    shrinkWrap: true,
-                                    physics: const BouncingScrollPhysics(),
-                                    itemCount: albums.length,
-                                    itemBuilder: (context, index) {
-                                      final album = albums[index];
-                                      final photo = album['photos'].isNotEmpty
-                                          ? album['photos'][0]
-                                          : null;
-                                      final totalPhotos =
-                                          album['_count']['photos'];
-
-                                      return ListTile(
-                                        contentPadding:
-                                            EdgeInsets.symmetric(vertical: 2),
-                                        leading: photo != null
-                                            ? Image.network(
-                                                photo['url'],
-                                                width: 50,
-                                                height: 50,
-                                                fit: BoxFit.cover,
-                                              )
-                                            : Icon(Icons.photo_album, size: 50),
-                                        title: Text(
-                                          album['title'],
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        subtitle: Text(
-                                          'Total Photos: $totalPhotos',
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        ),
-                                        onTap: () {
-                                          _addToAlbum(album['albumId']);
-                                          Navigator.pop(context);
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ),
-                        );
-                      },
+                      albums: albums,
+                      onAlbumSelected: _addToAlbum,
+                      isLoading: _loadingFecthingAlbum,
                     );
                   } else {
                     showAlert(context, 'No albums available', false);

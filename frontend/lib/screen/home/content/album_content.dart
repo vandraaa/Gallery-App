@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:gallery_app/screen/home/content/add_album/add_album_screen.dart';
 import 'package:gallery_app/screen/home/content/detail_album/detail_album_screen.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:gallery_app/constant/constant.dart';
+import 'package:gallery_app/service/album_photo_service.dart';
 import 'package:shimmer/shimmer.dart';
 
 class AlbumContent extends StatefulWidget {
@@ -61,17 +59,11 @@ class _AlbumContentState extends State<AlbumContent> {
       _isLoading = true;
     });
 
-    final url = Uri.parse(baseUrl + "/album/${widget.userId}");
-
     try {
-      final response = await http.get(url);
-      if (response.statusCode == 200) {
-        final decodedJson = json.decode(response.body);
-
-        setState(() {
-          _albums = decodedJson['data'];
-        });
-      }
+      final response = await getAlbums(widget.userId);
+      setState(() {
+        _albums = response;
+      });
     } catch (e) {
       print(e);
     } finally {
@@ -87,14 +79,24 @@ class _AlbumContentState extends State<AlbumContent> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _albums.isEmpty
-              ? const Center(
-                  child: Text(
-                    'No albums available.',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w600,
-                    ),
+              ? RefreshIndicator(
+                  onRefresh: _getAlbum,
+                  child: ListView(
+                    children: const [
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20.0),
+                          child: Text(
+                            'No albums available.',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 )
               : RefreshIndicator(
@@ -102,6 +104,7 @@ class _AlbumContentState extends State<AlbumContent> {
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: GridView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       controller: _scrollController,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
@@ -119,7 +122,7 @@ class _AlbumContentState extends State<AlbumContent> {
 
                         return GestureDetector(
                           onTap: () async {
-                            final result = await Navigator.push(
+                            await Navigator.push(
                               context,
                               PageRouteBuilder(
                                 pageBuilder:
@@ -136,10 +139,6 @@ class _AlbumContentState extends State<AlbumContent> {
                                 reverseTransitionDuration: Duration.zero,
                               ),
                             );
-
-                            if (result == true) {
-                              await _getAlbum();
-                            }
                           },
                           child: Card(
                             elevation: 4,
@@ -211,12 +210,13 @@ class _AlbumContentState extends State<AlbumContent> {
               backgroundColor: const Color(0xFF2196F3),
               onPressed: () async {
                 final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => AddAlbumScreen(
-                        userId: widget.userId,
-                      ),
-                    ));
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddAlbumScreen(
+                      userId: widget.userId,
+                    ),
+                  ),
+                );
 
                 if (result == true) {
                   await _getAlbum();

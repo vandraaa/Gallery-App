@@ -69,8 +69,6 @@ class GroupedPhotosWidget extends StatelessWidget {
                   },
                 ),
               );
-
-              fetchPhotos();
             },
             child: Card(
               elevation: 4,

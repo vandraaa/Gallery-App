@@ -34,13 +34,15 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   void _scrollListener() {
-    if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
+    if (_scrollController.position.userScrollDirection ==
+        ScrollDirection.reverse) {
       if (_isFabVisible) {
         setState(() {
           _isFabVisible = false;
         });
       }
-    } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
+    } else if (_scrollController.position.userScrollDirection ==
+        ScrollDirection.forward) {
       if (!_isFabVisible) {
         setState(() {
           _isFabVisible = true;
@@ -76,29 +78,38 @@ class _HomeContentState extends State<HomeContent> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : !_isHavePhoto
-                ? const Center(
-                    child: Text(
-                      "You don't have any photos",
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
+            : RefreshIndicator(
+                onRefresh: getPhoto,
+                child: _isHavePhoto
+                    ? ListView(
+                        controller: _scrollController,
+                        children: [
+                          GroupedPhotosWidget(
+                            groupedPhotos: _groupedPhotos,
+                            fetchPhotos: getPhoto,
+                          ),
+                        ],
+                      )
+                    : ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: const [
+                          Center(
+                            child: Padding(
+                              padding: EdgeInsets.only(top: 200.0),
+                              child: Text(
+                                "You don't have any photos",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: getPhoto,
-                    child: ListView(
-                      controller: _scrollController,
-                      children: [
-                        GroupedPhotosWidget(
-                          groupedPhotos: _groupedPhotos,
-                          fetchPhotos: getPhoto,
-                        ),
-                      ],
-                    ),
-                  ),
+              ),
       ),
       floatingActionButton: _isFabVisible
           ? FloatingActionButton(
@@ -111,7 +122,8 @@ class _HomeContentState extends State<HomeContent> {
                         AddPhotoScreen(
                       userId: widget.userId,
                     ),
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
                       return child;
                     },
                   ),
