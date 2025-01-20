@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:gallery_app/components/alert.dart';
+import 'package:gallery_app/components/detail_photo_view.dart';
+import 'package:gallery_app/constant/utils.dart';
 import 'package:gallery_app/components/confirm_popup_center.dart';
-import 'package:gallery_app/constant/constant.dart';
-import 'package:gallery_app/screens/home/home_screen.dart';
-import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:photo_view/photo_view.dart';
+import 'package:gallery_app/services/trash_photo_service.dart';
 
 class TrashDetailScreen extends StatefulWidget {
   final String photoUrl;
@@ -48,28 +44,11 @@ class _TrashDetailScreenState extends State<TrashDetailScreen> {
       _isLoading = true;
     });
 
-    final response = await http.patch(Uri.parse(
-        '$baseUrl/photos/trash?id=${widget.id}&userId=${widget.userId}'));
-    final responseData = json.decode(response.body)['message'];
-    try {
-      if (response.statusCode == 200) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const HomeScreen(initialIndex: 3)),
-        );
-        showAlert(context, responseData, true);
-      } else {
-        showAlert(context, responseData, false);
-      }
-    } catch (e) {
-      print(e);
-      showAlert(context, 'Failed to restore photo', false);
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    await restorePhoto(context, widget.id.toString(), widget.userId.toString());
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> _deletePhoto() async {
@@ -77,37 +56,11 @@ class _TrashDetailScreenState extends State<TrashDetailScreen> {
       _isLoadingDelete = true;
     });
 
-    final url = '${baseUrl}/photos/delete?id=${widget.id}&userId=${widget.userId}';
-    try {
-      final response = await http.delete(Uri.parse(url));
-      final responseData = json.decode(response.body)['message'];
-      if (response.statusCode == 200) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen(initialIndex: 3)),
-        );
-        showAlert(context, responseData, true);
-      } else {
-        showAlert(context, responseData, false);
-      }
-    } catch (e) {
-      print(e);
-      showAlert(context, 'Failed to delete photo', false);
-    } finally {
-      setState(() {
-        _isLoadingDelete = false;
-      });
-    }
-  }
+    await deletePhoto(context, widget.id.toString(), widget.userId.toString());
 
-  String _formatDate(String createdAt) {
-    DateTime parsedDate = DateTime.parse(createdAt);
-    return DateFormat('EEEE, dd MMMM yyyy').format(parsedDate);
-  }
-
-  String _formatTime(String createdAt) {
-    DateTime parsedDate = DateTime.parse(createdAt);
-    return DateFormat('HH:mm:ss').format(parsedDate);
+    setState(() {
+      _isLoadingDelete = false;
+    });
   }
 
   @override
@@ -136,7 +89,7 @@ class _TrashDetailScreenState extends State<TrashDetailScreen> {
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        PhotoViewScreen(
+                        DetailPhotoView(
                       photoUrl: widget.photoUrl,
                     ),
                     transitionsBuilder:
@@ -155,8 +108,41 @@ class _TrashDetailScreenState extends State<TrashDetailScreen> {
                   borderRadius: BorderRadius.circular(10),
                   child: Image.network(
                     widget.photoUrl,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      } else {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 40,
+                                height: 40,
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          (loadingProgress.expectedTotalBytes ??
+                                              1)
+                                      : null,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              const Text(
+                                "Loading image...",
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                    fontFamily: 'Poppins'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },
                   ),
                 ),
               ),
@@ -182,7 +168,7 @@ class _TrashDetailScreenState extends State<TrashDetailScreen> {
                 ),
               ),
             Text(
-              _formatDate(widget.createdAt),
+              formatDate2(widget.createdAt),
               style: const TextStyle(
                 fontSize: 14.5,
                 fontFamily: 'Poppins',
@@ -191,7 +177,7 @@ class _TrashDetailScreenState extends State<TrashDetailScreen> {
               ),
             ),
             Text(
-              _formatTime(widget.createdAt),
+              formatTime(widget.createdAt),
               style: const TextStyle(
                 fontSize: 14,
                 fontFamily: 'Poppins',
@@ -262,8 +248,7 @@ class _TrashDetailScreenState extends State<TrashDetailScreen> {
                       'Are you sure',
                       'Photos will be permanently deleted and cnn\'t be restored',
                       'Delete',
-                      _deletePhoto
-                    ),
+                      _deletePhoto),
               icon: _isLoadingDelete
                   ? const SizedBox(
                       width: 20,
@@ -298,24 +283,6 @@ class _TrashDetailScreenState extends State<TrashDetailScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class PhotoViewScreen extends StatelessWidget {
-  final String photoUrl;
-
-  const PhotoViewScreen({super.key, required this.photoUrl});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: PhotoView(
-        imageProvider: NetworkImage(photoUrl),
-        minScale: PhotoViewComputedScale.contained,
-        maxScale: PhotoViewComputedScale.covered * 2,
       ),
     );
   }

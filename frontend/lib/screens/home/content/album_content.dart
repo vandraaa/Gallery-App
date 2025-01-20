@@ -209,18 +209,21 @@ class _AlbumContentState extends State<AlbumContent> {
           ? FloatingActionButton(
               backgroundColor: const Color(0xFF2196F3),
               onPressed: () async {
-                final result = await Navigator.push(
+                await Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => AddAlbumScreen(
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) =>
+                        AddAlbumScreen(
                       userId: widget.userId,
                     ),
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      return child;
+                    },
+                    transitionDuration: Duration.zero,
+                    reverseTransitionDuration: Duration.zero,
                   ),
                 );
-
-                if (result == true) {
-                  await _getAlbum();
-                }
               },
               shape: const CircleBorder(),
               child: const Icon(

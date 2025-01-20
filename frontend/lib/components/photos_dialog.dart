@@ -71,7 +71,7 @@ void showPhotosDialog({
                                         fit: BoxFit.cover,
                                         loadingBuilder: (context, child, progress) {
                                           if (progress == null) {
-                                            return child; // Gambar sudah selesai dimuat
+                                            return child;
                                           } else {
                                             return Shimmer.fromColors(
                                               baseColor: Colors.grey[300]!,
@@ -126,9 +126,9 @@ void showPhotosDialog({
                   Navigator.pop(context);
                   onSave();
                 },
-                child: const Text(
-                  'Simpan',
-                  style: TextStyle(fontFamily: 'Poppins'),
+                child: Text(
+                  'Add',
+                  style: const TextStyle(fontFamily: 'Poppins'),
                 ),
               ),
             ],
