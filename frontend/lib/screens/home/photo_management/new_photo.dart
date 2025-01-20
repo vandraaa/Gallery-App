@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gallery_app/components/alert.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:gallery_app/service/photo_service.dart';
+import 'package:gallery_app/services/photo_service.dart';
 
 class AddPhotoScreen extends StatefulWidget {
   final int userId;

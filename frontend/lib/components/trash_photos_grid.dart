@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:gallery_app/screen/home/content/detail_trash/detail_trash.dart';
+import 'package:gallery_app/screens/home/photo_management/detail_trash.dart';
 import 'package:shimmer/shimmer.dart';
 
 class TrashPhotosGrid extends StatelessWidget {

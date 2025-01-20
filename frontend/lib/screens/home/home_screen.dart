@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:gallery_app/components/alert.dart';
 import 'package:gallery_app/components/confirm_popup_center.dart';
-import 'package:gallery_app/screen/auth/auth_screen.dart';
-import 'package:gallery_app/service/auth_service.dart';
-import 'package:gallery_app/screen/home/content/album_content.dart';
-import 'package:gallery_app/screen/home/content/favorite_content.dart';
-import 'package:gallery_app/screen/home/content/home_content.dart';
-import 'package:gallery_app/screen/home/content/trash_content.dart';
-import 'package:gallery_app/screen/profile/profile_screen.dart';
+import 'package:gallery_app/screens/auth/auth_screen.dart';
+import 'package:gallery_app/services/auth_service.dart';
+import 'package:gallery_app/screens/home/content/album_content.dart';
+import 'package:gallery_app/screens/home/content/favorite_content.dart';
+import 'package:gallery_app/screens/home/content/home_content.dart';
+import 'package:gallery_app/screens/home/content/trash_content.dart';
+import 'package:gallery_app/screens/profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final int initialIndex;

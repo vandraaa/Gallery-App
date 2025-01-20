@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 // import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 import 'package:gallery_app/components/alert.dart';
 import 'package:gallery_app/constant/utils.dart';
-import 'package:gallery_app/screen/home/content/detail_photo/detail_photo.dart';
+import 'package:gallery_app/screens/home/photo_management/detail_photo.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:gallery_app/constant/constant.dart';
@@ -27,6 +27,23 @@ Future<Map<String, List<dynamic>>> getPhotos(int userId) async {
   }
 
   return groupedPhotos;
+}
+
+Future<List<dynamic>> getPhotoToAlbum(int userId) async {
+  final response = await http.get(Uri.parse('$baseUrl/photos?id=$userId'));
+
+  try {
+    if (response.statusCode == 200) {
+      final decodedJson = json.decode(response.body);
+      return decodedJson['data'];
+    } else {
+      throw Exception('Failed to load photos');
+    }
+  } catch (error) {
+    print(error);
+  }
+
+  return [];
 }
 
 void _groupPhotos(

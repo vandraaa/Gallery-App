@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gallery_app/service/auth_service.dart';
+import 'package:gallery_app/services/auth_service.dart';
 
 class SignUpForm extends StatefulWidget {
   final VoidCallback onSignUpSucess;

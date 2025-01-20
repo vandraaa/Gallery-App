@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gallery_app/constant/constant.dart';
-import 'package:gallery_app/service/auth_service.dart';
-import 'package:gallery_app/screen/home/home_screen.dart';
+import 'package:gallery_app/services/auth_service.dart';
+import 'package:gallery_app/screens/home/home_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

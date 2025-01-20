@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gallery_app/service/auth_service.dart';
+import 'package:gallery_app/services/auth_service.dart';
 
 class SignInForm extends StatefulWidget {
   final VoidCallback onToggle;

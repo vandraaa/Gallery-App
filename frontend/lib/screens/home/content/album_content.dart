@@ -1,9 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:gallery_app/screen/home/content/add_album/add_album_screen.dart';
-import 'package:gallery_app/screen/home/content/detail_album/detail_album_screen.dart';
-import 'package:gallery_app/service/album_photo_service.dart';
+import 'package:gallery_app/screens/home/photo_management/add_album_screen.dart';
+import 'package:gallery_app/screens/home/photo_management/detail_album_screen.dart';
+import 'package:gallery_app/services/album_photo_service.dart';
 import 'package:shimmer/shimmer.dart';
 
 class AlbumContent extends StatefulWidget {

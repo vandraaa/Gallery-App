@@ -1,60 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:gallery_app/components/trash_photos_grid.dart';
-import 'package:gallery_app/service/trash_photo_service.dart';
+import 'package:gallery_app/components/favorite_photos_grid.dart';
+import 'package:gallery_app/services/favorite_photo_service.dart';
 
-class TrashContent extends StatefulWidget {
+class FavoriteContent extends StatefulWidget {
   final int userId;
-  const TrashContent({super.key, required this.userId});
+  const FavoriteContent({super.key, required this.userId});
 
   @override
-  State<TrashContent> createState() => _TrashContentState();
+  State<FavoriteContent> createState() => _FavoriteContentState();
 }
 
-class _TrashContentState extends State<TrashContent> {
-  bool _isFabVisible = true;
-  List<dynamic> _trashPhotos = [];
+class _FavoriteContentState extends State<FavoriteContent> {
+  List<dynamic> _favoritePhotos = [];
   bool _isLoading = true;
   bool _isHavePhoto = true;
-  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_scrollListener);
-    _fetchTrashPhotos();
+    _fetchFavoritePhotos();
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_scrollListener);
-    _scrollController.dispose();
     super.dispose();
   }
 
-  void _scrollListener() {
-    if (_scrollController.position.userScrollDirection ==
-        ScrollDirection.reverse) {
-      if (_isFabVisible) {
-        setState(() {
-          _isFabVisible = false;
-        });
-      }
-    } else if (_scrollController.position.userScrollDirection ==
-        ScrollDirection.forward) {
-      if (!_isFabVisible) {
-        setState(() {
-          _isFabVisible = true;
-        });
-      }
-    }
-  }
+  Future<void> _fetchFavoritePhotos() async {
+    setState(() {
+      _isLoading = true;
+    });
 
-  Future<void> _fetchTrashPhotos() async {
     try {
-      final photos = await getTrashPhotos(widget.userId);
+      final photos = await getFavoritePhotos(widget.userId);
       setState(() {
-        _trashPhotos = photos;
+        _favoritePhotos = photos;
         _isLoading = false;
         _isHavePhoto = photos.isNotEmpty;
       });
@@ -76,14 +57,14 @@ class _TrashContentState extends State<TrashContent> {
             ? const Center(child: CircularProgressIndicator())
             : !_isHavePhoto
                 ? RefreshIndicator(
-                    onRefresh: _fetchTrashPhotos,
+                    onRefresh: _fetchFavoritePhotos,
                     child: ListView(
                       children: const [
                        Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 20.0),
                           child: Text(
-                            'There is no photo in trash',
+                            'You don\'t have favorite photo.',
                             style: TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 16.0,
@@ -96,13 +77,13 @@ class _TrashContentState extends State<TrashContent> {
                     ),
                   )
                 : RefreshIndicator(
-                    onRefresh: _fetchTrashPhotos,
+                    onRefresh: _fetchFavoritePhotos,
                     child: ListView(
                       children: [
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 16.0),
                           child: Text(
-                            "Photo will be deleted after 7 days",
+                            "Your Favorite Photo",
                             style: TextStyle(
                               fontSize: 18,
                               fontFamily: 'Poppins',
@@ -110,8 +91,8 @@ class _TrashContentState extends State<TrashContent> {
                             ),
                           ),
                         ),
-                        TrashPhotosGrid(
-                          photos: _trashPhotos,
+                        FavoritePhotosGrid(
+                          photos: _favoritePhotos,
                         ),
                       ],
                     ),

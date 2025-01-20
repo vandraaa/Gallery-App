@@ -4,9 +4,9 @@ import 'package:gallery_app/components/confirm_popup_center.dart';
 import 'package:gallery_app/components/detail_photo_view.dart';
 import 'package:gallery_app/components/add_album_list.dart';
 import 'package:gallery_app/constant/utils.dart';
-import 'package:gallery_app/screen/home/content/detail_album/detail_album_screen.dart';
-import 'package:gallery_app/screen/home/home_screen.dart';
-import 'package:gallery_app/service/photo_service.dart';
+import 'package:gallery_app/screens/home/photo_management/detail_album_screen.dart';
+import 'package:gallery_app/screens/home/home_screen.dart';
+import 'package:gallery_app/services/photo_service.dart';
 // import 'package:gallery_app/screen/home/service/download_photo.dart';
 
 class PhotoDetailScreen extends StatefulWidget {

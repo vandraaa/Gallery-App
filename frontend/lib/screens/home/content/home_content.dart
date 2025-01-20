@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:gallery_app/components/grouped_photos.dart';
-import 'package:gallery_app/screen/home/content/add_photo/new_photo.dart';
-import 'package:gallery_app/service/photo_service.dart';
+import 'package:gallery_app/screens/home/photo_management/new_photo.dart';
+import 'package:gallery_app/services/photo_service.dart';
 
 class HomeContent extends StatefulWidget {
   final int userId;

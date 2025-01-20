@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gallery_app/screen/home/content/detail_photo/detail_photo.dart';
+import 'package:gallery_app/screens/home/photo_management/detail_photo.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 
