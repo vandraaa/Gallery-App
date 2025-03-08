@@ -322,17 +322,8 @@ class _PhotoDetailScreenState extends State<PhotoDetailScreen> {
                   ],
                 ),
                 IconButton(
-                  icon: const Icon(Icons.download_rounded, color: Colors.blue),
-                  onPressed: () {
-                    confirmPopupCenter(
-                      context,
-                      'Download',
-                      'Are you sure you want to download this photo?',
-                      'Download Photo',
-                      () => downloadPhoto(
-                          context, widget.photoUrl, widget.filename),
-                    );
-                  },
+                  icon: const Icon(Icons.ios_share, color: Colors.blue),
+                  onPressed: () => sharePhoto(widget.photoUrl),
                 ),
               ],
             ),

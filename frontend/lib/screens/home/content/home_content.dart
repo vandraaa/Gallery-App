@@ -13,17 +13,17 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
+  final ScrollController _scrollController = ScrollController();
   bool _isFabVisible = true;
-  final Map<String, List<dynamic>> _groupedPhotos = {};
+  Map<String, List<dynamic>> _groupedPhotos = {};
   bool _isLoading = true;
   bool _isHavePhoto = true;
-  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
-    getPhoto();
+    _fetchPhotos();
   }
 
   @override
@@ -34,15 +34,13 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   void _scrollListener() {
-    if (_scrollController.position.userScrollDirection ==
-        ScrollDirection.reverse) {
+    if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
       if (_isFabVisible) {
         setState(() {
           _isFabVisible = false;
         });
       }
-    } else if (_scrollController.position.userScrollDirection ==
-        ScrollDirection.forward) {
+    } else if (_scrollController.position.userScrollDirection == ScrollDirection.forward) {
       if (!_isFabVisible) {
         setState(() {
           _isFabVisible = true;
@@ -51,7 +49,7 @@ class _HomeContentState extends State<HomeContent> {
     }
   }
 
-  Future<void> getPhoto() async {
+  Future<void> _fetchPhotos() async {
     setState(() {
       _isLoading = true;
     });
@@ -60,10 +58,12 @@ class _HomeContentState extends State<HomeContent> {
       final groupedPhotos = await getPhotos(widget.userId);
       setState(() {
         _groupedPhotos.clear();
-        _groupedPhotos.addAll(groupedPhotos);
+        _groupedPhotos = groupedPhotos;
         _isLoading = false;
+        _isHavePhoto = groupedPhotos.isNotEmpty;
       });
-    } catch (e) {
+    } catch (error) {
+      print(error);
       setState(() {
         _isLoading = false;
         _isHavePhoto = false;
@@ -78,38 +78,43 @@ class _HomeContentState extends State<HomeContent> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
-                onRefresh: getPhoto,
-                child: _isHavePhoto
-                    ? ListView(
-                        controller: _scrollController,
-                        children: [
-                          GroupedPhotosWidget(
-                            groupedPhotos: _groupedPhotos,
-                            fetchPhotos: getPhoto,
-                          ),
-                        ],
-                      )
-                    : ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: const [
-                          Center(
-                            child: Padding(
-                              padding: EdgeInsets.only(top: 200.0),
-                              child: Text(
-                                "You don't have any photos",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                textAlign: TextAlign.center,
+            : !_isHavePhoto
+                ? RefreshIndicator(
+                    onRefresh: _fetchPhotos,
+                    child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20.0),
+                            child: Text(
+                              "You don't have any photos.",
+                              style: TextStyle(
+                                fontSize: 16.0,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w600,
                               ),
+                              textAlign: TextAlign.center,
                             ),
                           ),
-                        ],
-                      ),
-              ),
+                        ),
+                      ],
+                    ),
+                  )
+                : RefreshIndicator(
+                    onRefresh: _fetchPhotos,
+                    child: ListView(
+                      primary: false,
+                      controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        GroupedPhotosWidget(
+                          groupedPhotos: _groupedPhotos,
+                          fetchPhotos: _fetchPhotos,
+                        ),
+                      ],
+                    ),
+                  ),
       ),
       floatingActionButton: _isFabVisible
           ? FloatingActionButton(
@@ -119,21 +124,14 @@ class _HomeContentState extends State<HomeContent> {
                   context,
                   PageRouteBuilder(
                     pageBuilder: (context, animation, secondaryAnimation) =>
-                        AddPhotoScreen(
-                      userId: widget.userId,
-                    ),
-                    transitionsBuilder:
-                        (context, animation, secondaryAnimation, child) {
+                        AddPhotoScreen(userId: widget.userId),
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
                       return child;
                     },
                   ),
                 );
-
                 if (result == true) {
-                  setState(() {
-                    _isLoading = true;
-                  });
-                  await getPhoto();
+                  await _fetchPhotos();
                 }
               },
               shape: const CircleBorder(),

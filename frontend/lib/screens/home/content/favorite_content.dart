@@ -59,6 +59,7 @@ class _FavoriteContentState extends State<FavoriteContent> {
                 ? RefreshIndicator(
                     onRefresh: _fetchFavoritePhotos,
                     child: ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       children: const [
                        Center(
                         child: Padding(

@@ -97,9 +97,9 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const Padding(
-              padding: EdgeInsets.only(bottom: 16.0),
+              padding: EdgeInsets.only(bottom: 24.0),
               child: Text(
-                'Created by Kevin Andra',
+                'Created by Kevin Andra Nugroho',
                 style: TextStyle(
                   fontSize: 12.0,
                   fontWeight: FontWeight.w600,
